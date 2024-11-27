@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql_container
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cloudlibrary
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "3306:3306"
+    networks:
+      - my_network
+
+  cloudlibrary:
+    image: cloudlibrary:latest  # 你的应用镜像ID或名称
+    container_name: cloudlibrary
+    ports:
+      - "8080:8080"  # 将宿主机的8080端口映射到容器的8080端口
+    networks:
+      - my_network
+      
+networks:
+  my_network:
+    name: my_network
