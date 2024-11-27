@@ -36,8 +36,8 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.kong90 }}
-          password: ${{ secrets.SHA256:bBUwO0eIygSi15xHokb8g78tQ2i0PDuxxgxjhCKdTH0 }}
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建 Docker 镜像
         run: docker build -t cloudlibrary:latest .
@@ -45,7 +45,7 @@ jobs:
       - name: 推送 Docker 镜像
         run: |
           docker tag cloudlibrary:latest ${{ secrets.DOCKER_USERNAME }}/cloudlibrary:latest
-          docker push ${{ secrets.DOCKER_PASSWORD }}/cloudlibrary:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/cloudlibrary:latest
 
   deploy:
     name: 部署服务
@@ -66,4 +66,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 运行测试
-        run: curl -f http://localhost:8080/cloudlibrary/login || echo "服务不可用"
+        run: |
+          curl -f http://localhost:8080/cloudlibrary/login || echo "服务不可用"
