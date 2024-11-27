@@ -36,7 +36,7 @@ jobs:
       - name: 登录 DockerHub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: ${{ secrets.kong90 }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: 构建 Docker 镜像
@@ -45,7 +45,7 @@ jobs:
       - name: 推送 Docker 镜像
         run: |
           docker tag cloudlibrary:latest ${{ secrets.DOCKER_USERNAME }}/cloudlibrary:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/cloudlibrary:latest
+          docker push ${{ secrets.SHA256:bBUwO0eIygSi15xHokb8g78tQ2i0PDuxxgxjhCKdTH0 }}/cloudlibrary:latest
 
   deploy:
     name: 部署服务
