@@ -4,6 +4,9 @@ import com.itheima.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 /**
@@ -11,6 +14,7 @@ import javax.servlet.http.HttpSession;
  */
 @Controller
 public class UserController {
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
     @RequestMapping("/toMainPage")
     public String  toMainPage(){
         return "main";
@@ -24,6 +28,11 @@ public class UserController {
     @RequestMapping("/login")
     public String login(User user, HttpServletRequest request){
         try {
+            if (user == null || !StringUtils.hasText(user.getEmail()) || !StringUtils.hasText(user.getPassword())) {
+                request.setAttribute("msg","请输入账号与密码");
+                return  "forward:/admin/login.jsp";
+            }
+            user.setEmail(user.getEmail().trim().toLowerCase());
             User u=userService.login(user);
             /*
             用户账号和密码是否查询出用户信息
@@ -37,7 +46,7 @@ public class UserController {
             request.setAttribute("msg","用户名或密码错误");
             return  "forward:/admin/login.jsp";
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("登录异常", e);
             request.setAttribute("msg","系统错误");
             return  "forward:/admin/login.jsp";
         }
@@ -53,7 +62,7 @@ public String logout( HttpServletRequest request){
         session.invalidate();
         return  "forward:/admin/login.jsp";
     }catch(Exception e){
-        e.printStackTrace();
+        logger.error("注销异常", e);
         request.setAttribute("msg","系统错误");
         return  "forward:/admin/login.jsp";
     }

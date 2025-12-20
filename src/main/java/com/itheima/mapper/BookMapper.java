@@ -34,9 +34,9 @@ Book findById(String id);
     @Select({"<script>" +
             "SELECT * FROM book " +
             "where book_status !='3'" +
-            "<if test=\"name != null\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
-            "<if test=\"press != null\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
-            "<if test=\"author != null\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
+            "<if test=\"name != null and name != ''\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
+            "<if test=\"press != null and press != ''\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
+            "<if test=\"author != null and author != ''\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
             "order by book_borrowtime" +
             "</script>"
     })
@@ -52,15 +52,18 @@ Book findById(String id);
 @Select(
         {"<script>" +
                 "SELECT * FROM book " +
-                "where book_borrower=#{borrower}" +
-                "AND book_status ='1'"+
-                "<if test=\"name != null\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
-                "<if test=\"press != null\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
-                "<if test=\"author != null\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
-                "or book_status ='2'"+
-                "<if test=\"name != null\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
-                "<if test=\"press != null\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
-                "<if test=\"author != null\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
+                "where (" +
+                "book_borrower=#{borrower}" +
+                " AND book_status ='1'"+
+                "<if test=\"name != null and name != ''\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
+                "<if test=\"press != null and press != ''\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
+                "<if test=\"author != null and author != ''\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
+                ") or (" +
+                "book_status ='2'"+
+                "<if test=\"name != null and name != ''\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
+                "<if test=\"press != null and press != ''\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
+                "<if test=\"author != null and author != ''\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
+                ")" +
                 "order by book_borrowtime" +
                 "</script>"})
 @ResultMap("bookMap")
@@ -71,13 +74,22 @@ Page<Book> selectBorrowed(Book book);
         "SELECT * FROM book " +
         "where book_borrower=#{borrower}" +
         "AND book_status in('1','2')"+
-        "<if test=\"name != null\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
-        "<if test=\"press != null\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
-        "<if test=\"author != null\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
+        "<if test=\"name != null and name != ''\"> AND  book_name  like  CONCAT('%',#{name},'%')</if>" +
+        "<if test=\"press != null and press != ''\"> AND book_press like  CONCAT('%', #{press},'%') </if>" +
+        "<if test=\"author != null and author != ''\"> AND book_author like  CONCAT('%', #{author},'%')</if>" +
         "order by book_borrowtime" +
         "</script>"})
 @ResultMap("bookMap")
 //查询借阅但未归还的图书
 Page<Book> selectMyBorrowed(Book book);
+
+@Select("SELECT COUNT(*) FROM book WHERE book_status = #{status}")
+Integer countByStatus(@Param("status") String status);
+
+@Select("SELECT COUNT(*) FROM book WHERE book_status = #{status} AND book_borrower = #{borrower}")
+Integer countByStatusForBorrower(@Param("status") String status, @Param("borrower") String borrower);
+
+@Select("SELECT COUNT(*) FROM book WHERE book_status != '3'")
+Integer countActive();
 
 }

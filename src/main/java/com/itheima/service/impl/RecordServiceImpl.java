@@ -10,6 +10,8 @@ import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -19,6 +21,7 @@ import java.util.Date;
 @Service
 @Transactional
 public class RecordServiceImpl implements RecordService {
+    private static final Logger logger = LoggerFactory.getLogger(RecordServiceImpl.class);
     @Autowired
     private RecordMapper recordMapper;
 
@@ -28,6 +31,13 @@ public class RecordServiceImpl implements RecordService {
  */
 @Override
 public Integer addRecord(Record record) {
+    if (record == null) {
+        return 0;
+    }
+    if (record.getRemandTime() == null || record.getRemandTime().trim().isEmpty()) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        record.setRemandTime(dateFormat.format(new Date()));
+    }
     return recordMapper.addRecord(record);
 }
 
@@ -40,6 +50,13 @@ public Integer addRecord(Record record) {
  */
 @Override
 public PageResult searchRecords(Record record, User user, Integer pageNum, Integer pageSize) {
+    if (record == null) {
+        record = new Record();
+    }
+    if (user == null) {
+        logger.warn("searchRecords called with null user");
+        return new PageResult(0, java.util.Collections.emptyList());
+    }
     // 设置分页查询的参数，开始分页
     PageHelper.startPage(pageNum, pageSize);
     //如果不是管理员，则查询条件中的借阅人设置为当前登录用户

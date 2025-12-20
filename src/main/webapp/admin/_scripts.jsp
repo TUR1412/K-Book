@@ -1,0 +1,9 @@
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<c:set var="ctx" value="${pageContext.request.contextPath}" />
+<script>
+    window.__ctx = '${pageContext.request.contextPath}';
+</script>
+<script src="${ctx}/js/jquery.min.js?v=${appVersion}"></script>
+<script src="${ctx}/js/bootstrap.js?v=${appVersion}"></script>
+<script src="${ctx}/js/app.js?v=${appVersion}"></script>
+<script src="${ctx}/js/my.js?v=${appVersion}"></script>

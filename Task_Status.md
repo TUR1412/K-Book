@@ -1,0 +1,124 @@
+# [KB-20251220] 任务看板
+> **环境**: Windows 11 (pwsh -NoLogo -NoProfile wrapper) | **框架**: Spring MVC + JSP | **档位**: 4档 (架构重构)
+> **已激活矩阵**: [模块 A: 视觉矫正] + [模块 E: 幽灵防御]
+
+## 1. 需求镜像 (Requirement Mirroring)
+> **我的理解**: 对 K-Book 仓库做原子级审查与升级，重点是前端 UI 夸克级优化与 README 美化，完成后推送并删除本地克隆。
+> **不做什么**: 不在后台启动服务，不占用端口，不执行长期驻留进程。
+
+## 2. 进化知识库 (Evolutionary Knowledge - Ω)
+- [!] Windows 下命令统一使用 `pwsh -NoLogo -NoProfile -Command '...'`。
+- [!] Maven 未在本机环境安装，构建需补充工具链或使用 CI。
+
+## 3. 执行清单 (Execution)
+- [x] 1. 前端布局重构（移除 iframe、统一布局、Bento 仪表盘）
+- [x] 2. 视觉主题升级（玻璃拟态、渐变背景、组件化样式）
+- [x] 3. 交互与提示优化（toast、人性化反馈、表单校验）
+- [x] 4. 资源版本化与缓存穿透
+- [x] 5. README 与预览资源完善
+- [x] 6. CI 工作流升级为真实构建
+- [x] 7. Round 2 视觉与交互增强（空状态插画/动效/表单持久化）
+- [x] 8. Round 3 交互细节完善（紧凑模式/快捷键/加载态/日期限制）
+- [x] 9. Round 4 筛选重置与顶部栏悬浮体验提升
+- [x] 10. Round 5 回到顶部/筛选可视化/图例/ISBN易读
+- [x] 11. Round 6 快捷键提示与按钮密度优化
+- [x] 12. Round 7 筛选区按钮排版与操作稳定
+- [x] 13. Round 8 可访问性增强与角色徽章
+- [x] 14. Round 9 ISBN 快速复制 / 行级突出 / 空状态管理动作
+- [x] 15. Round 10 登录体验增强（显示密码开关）
+- [x] 16. Round 11 高对比模式与快捷键 Alt+C
+- [x] 17. Round 12 搜索聚焦快捷键与滚动位置记忆
+- [x] 18. Round 13 表单数字化输入优化
+- [x] 19. Round 14 对比与对焦一致性增强
+- [x] 20. Round 15 ISBN 输入模式与格式约束强化
+- [x] 21. Round 16 借阅日期智能默认
+- [x] 22. Round 17 ISBN 数字校验严格化
+- [x] 23. Round 18 登录大写锁定提示
+- [x] 24. Round 19 筛选标签可点击清除
+- [x] 25. Round 20 对比/紧凑按钮提示文案完善
+- [x] 26. Round 21 列表页摘要信息强化
+- [x] 27. Round 22 分页首末页与可访问标签
+- [x] 28. Round 23 ISBN 复制键盘可用性
+- [x] 29. Round 24 ISBN 焦点样式强化
+- [x] 30. Round 25 过滤标签交互细节完善
+- [x] 31. Round 26 顶部栏阴影与卡片悬浮反馈
+- [x] 32. Round 27 表头语义化 scope 提升
+- [x] 33. Round 28 分页首末页支持
+- [x] 34. Round 29 顶部栏时间展示
+- [x] 35. Round 30 对比/紧凑按钮提示完善
+- [x] 36. Round 31 表格行序号显示
+- [x] 37. Round 32 归还日期剩余天数提示
+- [x] 38. Round 33 逾期标识高亮
+- [x] 39. Round 34 ISBN 可访问性强化
+- [x] 40. Round 35 顶部栏滚动阴影反馈
+- [x] 41. Round 36 模态窗自动聚焦首个输入
+- [x] 42. Round 37 Alt+R 快捷清空筛选
+- [x] 43. Round 38 数字输入实时净化
+- [x] 44. Round 39 侧栏快捷键提示扩展
+- [x] 45. Round 40 表格序号列与状态对齐优化
+- [x] 46. Round 41 归还日期提示文案补充
+- [x] 47. Round 42 筛选标签键盘操作支持
+- [x] 48. Round 43 筛选标签焦点样式强化
+- [x] 49. Round 44 状态单元格居中规范
+- [x] 50. Round 45 CHANGELOG 文档补齐
+- [x] 51. Round 46 CONTRIBUTING 指南补齐
+- [x] 52. Round 47 SECURITY 安全说明补齐
+- [x] 53. Round 48 CODE_OF_CONDUCT 行为准则补齐
+- [x] 54. Round 49 STYLE_GUIDE UI 指南补齐
+- [x] 55. Round 50 README 文档索引补齐
+- [x] 56. Round 51 .editorconfig 规范补齐
+- [x] 57. Round 52 部署指南补齐
+- [x] 58. Round 53 架构概览补齐
+- [x] 59. Round 54 FAQ 文档补齐
+- [x] 60. Round 55 Bug Issue 模板补齐
+- [x] 61. Round 56 Feature Issue 模板补齐
+- [x] 62. Round 57 README 文档索引扩充
+- [x] 63. Round 58 分页跳转输入语义化
+- [x] 64. Round 59 分页首末页样式强化
+- [x] 65. Round 60 .gitattributes 规范补齐
+- [x] 66. Round 61 PR 模板补齐
+- [x] 67. Round 62 路线图文档补齐
+- [x] 68. Round 63 API 文档补齐
+- [x] 69. Round 64 数据结构文档补齐
+- [x] 70. Round 65 README 文档索引扩充
+- [x] 71. Round 66 Issue/PR 模板协同补齐
+- [x] 72. Round 67 安全响应头过滤器补齐
+- [x] 73. Round 68 Result actionableSuggestion 字段支持
+- [x] 74. Round 69 登录空值校验与账号 trim
+- [x] 75. Round 70 登录输入体验优化（inputmode/拼写关闭）
+- [x] 76. Round 71 登录页引入统一脚本
+- [x] 77. Round 72 登录提醒自动淡出
+- [x] 78. Round 73 借阅/归还会话过期防护
+- [x] 79. Round 74 图书 ID 校验与异常兜底
+- [x] 80. Round 75 图书检索/表单输入净化
+- [x] 81. Round 76 错误提示加入可执行建议
+- [x] 82. Round 77 借阅记录会话过期防护
+- [x] 83. Round 78 借阅记录检索输入净化
+- [x] 84. Round 79 借阅逻辑空值/状态守卫
+- [x] 85. Round 80 归还逻辑空值守卫
+- [x] 86. Round 81 归还日期默认兜底
+- [x] 87. Round 82 分页脚本作用域修复
+- [x] 88. Round 83 分页脚本 aria-current 支持
+- [x] 89. Round 84 分页页码边界修正
+- [x] 90. Round 85 分页样式 hover/focus 提升
+- [x] 91. Round 86 卡片头部动作区统一
+- [x] 92. Round 87 筛选计数徽章接入
+- [x] 93. Round 88 筛选状态实时计算与清空禁用
+- [x] 94. Round 89 前端提示联动 actionableSuggestion
+- [x] 95. Round 90 动效尊重 reduced-motion 偏好
+- [x] 96. Round 91 密度切换反馈 toast
+- [x] 97. Round 92 高对比切换反馈 toast
+- [x] 98. Round 93 搜索聚焦扩展 Ctrl/Cmd+K
+- [x] 99. Round 94 快捷键帮助按钮接入
+- [x] 100. Round 95 快捷键帮助面板结构
+- [x] 101. Round 96 快捷键帮助面板交互完善
+- [x] 102. Round 97 快捷键视觉组件 kbd 样式
+- [x] 103. Round 98 ISBN 复制提示浮层
+- [x] 104. Round 99 Skeleton 占位样式准备
+- [x] 105. Round 100 资源版本号推进与缓存刷新
+- [x] 106. Round 101-200 连续优化完成（详见 docs/optimization-rounds.md）
+- [x] 107. Round 201-450 连续优化完成（详见 docs/optimization-rounds.md）
+- [x] 108. Round 451-700 连续优化完成（详见 docs/optimization-rounds.md）
+- [x] 109. Round 701-1000 连续优化完成（详见 docs/optimization-rounds.md）
+- [ ] 108. 依赖升级与日志体系精修（如需继续）
+- [ ] 109. 本地构建验证 / 提交 / 推送 / 删除克隆

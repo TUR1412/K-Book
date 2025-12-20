@@ -11,8 +11,8 @@ Integer addRecord(Record record);
 @Select({"<script>" +
         "SELECT * FROM record " +
         "where 1=1" +
-        "<if test=\"borrower != null\">AND record_borrower like  CONCAT('%',#{borrower},'%')</if>" +
-        "<if test=\"bookname != null\">AND record_bookname  like  CONCAT('%',#{bookname},'%') </if>" +
+        "<if test=\"borrower != null and borrower != ''\">AND record_borrower like  CONCAT('%',#{borrower},'%')</if>" +
+        "<if test=\"bookname != null and bookname != ''\">AND record_bookname  like  CONCAT('%',#{bookname},'%') </if>" +
         "order by record_remandtime DESC" +
         "</script>"
 })

@@ -2,6 +2,7 @@ package com.itheima.service;
 import com.itheima.domain.Book;
 import com.itheima.domain.User;
 import entity.PageResult;
+import java.util.Map;
 /**
  * 图书接口
  */
@@ -24,5 +25,8 @@ PageResult searchBorrowed(Book book, User user, Integer pageNum, Integer pageSiz
 boolean returnBook(String  id,User user);
 //归还确认
 Integer returnConfirm(String id);
+
+//仪表盘汇总
+Map<String, Integer> getSummary(User user);
 
 }

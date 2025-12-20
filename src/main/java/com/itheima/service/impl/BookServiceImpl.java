@@ -14,7 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -49,8 +52,17 @@ public Book findById(String id) {
  */
 @Override
 public Integer borrowBook(Book book) {
+    if (book == null || book.getId() == null) {
+        return 0;
+    }
     //根据id查询出需要借阅的完整图书信息
     Book b = this.findById(book.getId()+"");
+    if (b == null) {
+        return 0;
+    }
+    if (!"0".equals(b.getStatus())) {
+        return 0;
+    }
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     //设置当天为借阅时间
     book.setBorrowTime(dateFormat.format(new Date()));
@@ -60,6 +72,27 @@ public Integer borrowBook(Book book) {
     book.setPrice(b.getPrice());
     //将图书的上架设置在book对象中
     book.setUploadTime(b.getUploadTime());
+    String returnTime = book.getReturnTime();
+    boolean validReturn = true;
+    if (returnTime == null || returnTime.trim().isEmpty()) {
+        validReturn = false;
+    } else {
+        try {
+            Date rt = dateFormat.parse(returnTime.trim());
+            Date today = new Date();
+            Date todayDate = dateFormat.parse(dateFormat.format(today));
+            if (rt.before(todayDate)) {
+                validReturn = false;
+            }
+        } catch (Exception ex) {
+            validReturn = false;
+        }
+    }
+    if (!validReturn) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.DAY_OF_YEAR, 7);
+        book.setReturnTime(dateFormat.format(calendar.getTime()));
+    }
     return bookMapper.editBook(book);
 }
 
@@ -84,6 +117,9 @@ public Integer addBook(Book book) {
     DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     //设置新增图书的上架时间
     book.setUploadTime(dateFormat.format(new Date()));
+    if (book.getStatus() == null || book.getStatus().trim().isEmpty()) {
+        book.setStatus("0");
+    }
     return  bookMapper.addBook(book);
 }
 
@@ -126,8 +162,14 @@ public PageResult searchBorrowed(Book book, User user, Integer pageNum, Integer 
  */
 @Override
 public boolean returnBook(String id,User user) {
+    if (id == null || user == null) {
+        return false;
+    }
     //根据图书id查询出图书的完整信息
     Book book = this.findById(id);
+    if (book == null || book.getBorrower() == null) {
+        return false;
+    }
     //再次核验当前登录人员和图书借阅者是不是同一个人
     boolean rb=book.getBorrower().equals(user.getName());
     //如果是同一个人，允许归还
@@ -149,6 +191,12 @@ private RecordService recordService;
 public Integer returnConfirm(String id) {
     //根据图书id查询图书的完整信息
     Book book = this.findById(id);
+    if (book == null) {
+        return 0;
+    }
+    if (!"2".equals(book.getStatus())) {
+        return 0;
+    }
     //根据归还确认的图书信息，设置借阅记录
     Record record = this.setRecord(book);
     //将图书的借阅状态修改为可借阅
@@ -165,6 +213,32 @@ public Integer returnConfirm(String id) {
         return  recordService.addRecord(record);
     }
     return 0;
+}
+
+@Override
+public Map<String, Integer> getSummary(User user) {
+    Map<String, Integer> summary = new HashMap<String, Integer>();
+    if (user == null) {
+        return summary;
+    }
+    boolean isAdmin = "ADMIN".equals(user.getRole());
+    if (isAdmin) {
+        summary.put("returning", safeCount(bookMapper.countByStatus("2")));
+        summary.put("borrowed", safeCount(bookMapper.countByStatus("1")));
+        summary.put("available", safeCount(bookMapper.countByStatus("0")));
+        summary.put("active", safeCount(bookMapper.countActive()));
+        return summary;
+    }
+    String name = user.getName();
+    summary.put("returning", safeCount(bookMapper.countByStatusForBorrower("2", name)));
+    summary.put("borrowed", safeCount(bookMapper.countByStatusForBorrower("1", name)));
+    summary.put("available", safeCount(bookMapper.countByStatus("0")));
+    summary.put("active", safeCount(bookMapper.countActive()));
+    return summary;
+}
+
+private int safeCount(Integer value) {
+    return value == null ? 0 : value;
 }
 /**
  * 根据图书信息设置借阅记录的信息

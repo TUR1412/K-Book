@@ -1,91 +1,91 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>云借阅-图书管理系统</title>
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/bootstrap.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/AdminLTE.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/_all-skins.min.css">
-    <script src="${pageContext.request.contextPath}/js/jquery.min.js"></script>
-    <script src="${pageContext.request.contextPath}/js/bootstrap.js"></script>
-    <script type="text/javascript">
-        function SetIFrameHeight() {
-            var iframeid = document.getElementById("iframe");
-            if (document.getElementById) {
-                /*设置 内容展示区的高度等于页面可视区的高度*/
-                iframeid.height = document.documentElement.clientHeight;
-            }
-        }
-    </script>
-</head>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<jsp:include page="/admin/_layout_top.jsp">
+    <jsp:param name="pageTitle" value="仪表盘" />
+    <jsp:param name="pageHint" value="总览 · 快速入口 · 借阅引导" />
+    <jsp:param name="activeNav" value="dashboard" />
+</jsp:include>
 
-<body class="hold-transition skin-green sidebar-mini">
-<div class="wrapper">
-    <!-- 页面头部 -->
-    <header class="main-header">
-        <!-- Logo -->
-        <a href="${pageContext.request.contextPath}/admin/main.jsp" class="logo">
-            <span class="logo-lg"><b>云借阅-图书管理系统</b></span>
-        </a>
-        <!-- 头部导航 -->
-        <nav class="navbar navbar-static-top">
-            <div class="navbar-custom-menu">
-                <ul class="nav navbar-nav">
-                    <li class="dropdown user user-menu">
-                        <a>
-                            <img src="${pageContext.request.contextPath}/img/user.jpg" class="user-image"
-                                 alt="User Image">
-                            <span class="hidden-xs">${USER_SESSION.name}</span>
-                        </a>
-                    </li>
-                    <li class="dropdown user user-menu">
-                        <a href="${pageContext.request.contextPath}/logout">
-                            <span class="hidden-xs">注销</span>
-                        </a>
-                    </li>
-                </ul>
+<div class="bento">
+    <section class="card bento-span-7">
+        <div class="hero">
+            <span class="badge">云借阅 · 指挥台</span>
+            <h2 class="hero-title">
+                欢迎回来，
+                <c:choose>
+                    <c:when test="${not empty USER_SESSION}">
+                        <c:out value="${USER_SESSION.name}"/>
+                    </c:when>
+                    <c:otherwise>读者</c:otherwise>
+                </c:choose>
+            </h2>
+            <p class="card-subtitle">集中查看馆藏状态、借阅进度与下一步动作。</p>
+            <div class="hero-actions">
+                <a class="btn btn-primary" href="${pageContext.request.contextPath}/book/search">开始借阅</a>
+                <a class="btn btn-ghost" href="${pageContext.request.contextPath}/book/selectNewbooks">查看新书</a>
+                <a class="btn btn-outline is-hidden" id="continue-link" href="#">继续上次页面</a>
             </div>
-        </nav>
-    </header>
-    <!-- 页面头部 /-->
+        </div>
+    </section>
 
-    <!-- 导航侧栏 -->
-    <aside class="main-sidebar">
-        <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
-            <!-- /.search form -->
-            <!-- sidebar menu: : style can be found in sidebar.less -->
-            <ul class="sidebar-menu">
-                <li >
-                    <a href="main.jsp">
-                        <i class="fa fa-dashboard"></i> <span>首页</span>
-                    </a>
-                </li>
-                <li >
-                    <a href="${pageContext.request.contextPath}/book/search" target="iframe">
-                        <i class="fa fa-circle-o"></i>图书借阅
-                    </a>
-                </li>
-                <li>
-                    <a href="${pageContext.request.contextPath}/book/searchBorrowed" target="iframe">
-                        <i class="fa fa-circle-o"></i>当前借阅
-                    </a>
-                </li>
-                <li >
-                    <a href="${pageContext.request.contextPath}/record/searchRecords" target="iframe">
-                        <i class="fa fa-circle-o"></i>借阅记录
-                    </a>
-                </li>
-            </ul>
-        </section>
-        <!-- /.sidebar -->
-    </aside>
-    <!-- 导航侧栏 /-->
-    <!-- 内容展示区域 -->
-    <div class="content-wrapper">
-        <iframe width="100%" id="iframe" name="iframe" onload="SetIFrameHeight()"
-                frameborder="0" src="${pageContext.request.contextPath}/book/selectNewbooks"></iframe>
-    </div>
+    <section class="card bento-span-5">
+        <div class="card-header">
+            <div>
+                <h3 class="card-title">今日节奏</h3>
+                <p class="card-subtitle">建议优先处理待归还与借阅确认。</p>
+            </div>
+            <div class="card-header-actions">
+                <button class="btn btn-outline btn-sm" type="button" id="summary-refresh">刷新数据</button>
+                <span class="badge badge-muted" id="summary-updated" aria-live="polite">未刷新</span>
+            </div>
+        </div>
+        <div class="kpi-grid">
+            <div class="kpi-item">
+                <div class="kpi-label">待归还确认</div>
+                <div class="kpi-value skeleton" data-kpi="returning" aria-live="polite">—</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-label">借阅中图书</div>
+                <div class="kpi-value skeleton" data-kpi="borrowed" aria-live="polite">—</div>
+            </div>
+            <div class="kpi-item">
+                <div class="kpi-label">可借阅图书</div>
+                <div class="kpi-value skeleton" data-kpi="available" aria-live="polite">—</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card bento-span-4">
+        <h3 class="card-title">快速流程</h3>
+        <p class="card-subtitle">从检索到借阅确认只需三步。</p>
+        <div class="kpi-grid">
+            <div class="kpi-item">1. 搜索图书并筛选条件</div>
+            <div class="kpi-item">2. 选择归还日期并提交借阅</div>
+            <div class="kpi-item">3. 到行政中心取书确认</div>
+        </div>
+    </section>
+
+    <section class="card bento-span-4">
+        <h3 class="card-title">本周重点</h3>
+        <p class="card-subtitle">优化库存周转率与借阅体验。</p>
+        <div class="kpi-grid">
+            <div class="kpi-item">整理超期借阅清单</div>
+            <div class="kpi-item">更新热门书籍推荐</div>
+            <div class="kpi-item">核对借阅记录完整性</div>
+        </div>
+    </section>
+
+    <section class="card bento-span-4">
+        <h3 class="card-title">系统状态</h3>
+        <p class="card-subtitle">保持良好运行，定期核查日志。</p>
+        <div class="kpi-grid">
+            <div class="kpi-item">数据库连接：待接入监控</div>
+            <div class="kpi-item">拦截器状态：已配置</div>
+            <div class="kpi-item">活跃馆藏：<span class="kpi-inline" data-kpi="active" aria-live="polite">—</span></div>
+            <div class="kpi-item">静态资源：版本化已启用</div>
+        </div>
+    </section>
 </div>
-</body>
-</html>
+
+<jsp:include page="/admin/_scripts.jsp" />
+<jsp:include page="/admin/_layout_bottom.jsp" />

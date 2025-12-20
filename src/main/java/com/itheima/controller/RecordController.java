@@ -7,10 +7,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
 @Controller
 @RequestMapping("/record")
 public class RecordController {
+    private static final int DEFAULT_PAGE_SIZE = 10;
+    private static final int MAX_PAGE_SIZE = 50;
+    private static final int MAX_BORROWER_LEN = 40;
+    private static final int MAX_BOOKNAME_LEN = 80;
+    private static final Logger logger = LoggerFactory.getLogger(RecordController.class);
     @Autowired
     private RecordService recordService;
 /**
@@ -21,15 +28,23 @@ public class RecordController {
  */
 @RequestMapping("/searchRecords")
 public ModelAndView searchRecords(Record record, HttpServletRequest request, Integer pageNum, Integer pageSize){
-    if(pageNum==null){
-        pageNum=1;
-    }
-    if(pageSize==null){
-        pageSize=10;
-    }
+    pageNum = normalizePageNum(pageNum);
+    pageSize = normalizePageSize(pageSize);
     //获取当前登录用户的信息
     User user = ((User) request.getSession().getAttribute("USER_SESSION"));
-    PageResult pageResult=recordService.searchRecords(record,user,pageNum,pageSize);
+    if (user == null) {
+        request.setAttribute("msg", "您还没有登录，请先登录！");
+        return new ModelAndView("forward:/admin/login.jsp");
+    }
+    sanitizeRecord(record);
+    PageResult pageResult;
+    try {
+        pageResult=recordService.searchRecords(record,user,pageNum,pageSize);
+    } catch (Exception ex) {
+        logger.error("查询借阅记录失败", ex);
+        request.setAttribute("msg", "查询记录失败，请稍后再试。");
+        return new ModelAndView("forward:/admin/record.jsp");
+    }
     ModelAndView modelAndView=new ModelAndView();
     modelAndView.setViewName("record");
     //将查询到的数据存放在 ModelAndView的对象中
@@ -41,6 +56,48 @@ public ModelAndView searchRecords(Record record, HttpServletRequest request, Int
     //将当前查询的控制器路径返回到页面，页码变化时继续向该路径发送请求
     modelAndView.addObject("gourl", request.getRequestURI());
     return modelAndView;
+}
+
+private void sanitizeRecord(Record record) {
+    if (record == null) {
+        return;
+    }
+    record.setBookname(normalizeText(record.getBookname(), MAX_BOOKNAME_LEN));
+    record.setBorrower(normalizeText(record.getBorrower(), MAX_BORROWER_LEN));
+    record.setBookisbn(trimToNull(record.getBookisbn()));
+}
+
+private String normalizeText(String value, int maxLen) {
+    String trimmed = trimToNull(value);
+    if (trimmed == null) {
+        return null;
+    }
+    String collapsed = trimmed.replaceAll("\\\\s+", " ");
+    if (collapsed.length() > maxLen) {
+        return collapsed.substring(0, maxLen);
+    }
+    return collapsed;
+}
+
+private String trimToNull(String value) {
+    if (value == null) {
+        return null;
+    }
+    String trimmed = value.trim();
+    return trimmed.isEmpty() ? null : trimmed;
+}
+
+private int normalizePageNum(Integer pageNum) {
+    int num = pageNum == null ? 1 : pageNum;
+    return Math.max(num, 1);
+}
+
+private int normalizePageSize(Integer pageSize) {
+    int size = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
+    if (size < 1) {
+        return DEFAULT_PAGE_SIZE;
+    }
+    return Math.min(size, MAX_PAGE_SIZE);
 }
 }
 

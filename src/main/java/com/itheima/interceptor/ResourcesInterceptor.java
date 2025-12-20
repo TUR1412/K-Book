@@ -21,6 +21,9 @@ public class ResourcesInterceptor extends HandlerInterceptorAdapter {
         User user = (User) request.getSession().getAttribute("USER_SESSION");
         //获取请求的路径
         String uri = request.getRequestURI();
+        if (isStaticResource(uri)) {
+            return true;
+        }
         //如果用户是已登录状态，判断访问的资源是否有权限
         if (user != null) {
             //如果是管理员，放行
@@ -29,10 +32,12 @@ public class ResourcesInterceptor extends HandlerInterceptorAdapter {
             }
             //如果是普通用户
             else if (!"ADMIN".equals(user.getRole())) {
-                for (String url : ignoreUrl) {
-                    //访问的资源不是管理员权限的资源，放行
-                    if (uri.indexOf(url) >= 0) {
-                        return true;
+                if (ignoreUrl != null) {
+                    for (String url : ignoreUrl) {
+                        //访问的资源不是管理员权限的资源，放行
+                        if (url != null && uri.indexOf(url) >= 0) {
+                            return true;
+                        }
                     }
                 }
             }
@@ -45,5 +50,12 @@ public class ResourcesInterceptor extends HandlerInterceptorAdapter {
         request.setAttribute("msg", "您还没有登录，请先登录！");
         request.getRequestDispatcher("/admin/login.jsp").forward(request, response);
         return false;
+    }
+
+    private boolean isStaticResource(String uri) {
+        if (uri == null) {
+            return false;
+        }
+        return uri.contains("/css/") || uri.contains("/js/") || uri.contains("/images/") || uri.contains("/fonts/");
     }
 }
