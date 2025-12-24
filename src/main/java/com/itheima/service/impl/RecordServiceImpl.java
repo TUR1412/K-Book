@@ -6,16 +6,13 @@ import com.itheima.domain.Record;
 import com.itheima.domain.User;
 import com.itheima.mapper.RecordMapper;
 import com.itheima.service.RecordService;
+import com.itheima.util.DateTimes;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 
 @Service
@@ -35,8 +32,7 @@ public Integer addRecord(Record record) {
         return 0;
     }
     if (record.getRemandTime() == null || record.getRemandTime().trim().isEmpty()) {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        record.setRemandTime(dateFormat.format(new Date()));
+        record.setRemandTime(DateTimes.todayIsoDate());
     }
     return recordMapper.addRecord(record);
 }

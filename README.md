@@ -39,7 +39,7 @@
 - Java 17
 - Spring MVC 5.3 + MyBatis 3.5 + PageHelper
 - JSP + 原生 CSS/JS（无 jQuery/Bootstrap 运行时依赖）
-- MySQL 8（Connector/J）+ Druid
+- MySQL 8（Connector/J）+ HikariCP
 - Logback（SLF4J）
 - Maven Wrapper（`mvnw` / `mvnw.cmd`）
 - Docker（可选：Tomcat 9 + JDK 17）
@@ -139,6 +139,30 @@ K-Book
 - `docs/ROADMAP.md`：路线图
 - `CHANGELOG.md`：版本更新记录
 - `CONTRIBUTING.md`：贡献流程
+
+---
+
+## 未来进化蓝图（3 个版本推演）
+
+> 目标：在保持“借阅流程清晰 + 管理体验稳定”的前提下，逐步从“单体 JSP 应用”演进到“可观测、可扩展、可持续交付”的产品形态。
+
+### v1.1（稳定性与可观测性优先）
+- 引入数据库迁移工具（Flyway/Liquibase），让 `deploy/init.sql` 从“初始化脚本”演进为“可重复演进的迁移链”
+- 增加健康检查与运行信息（例如 `/health`、`/version`），为容器化与监控打底
+- 统一日志结构（requestId/用户信息/耗时）并补齐关键业务链路埋点（登录、借阅、归还、确认）
+- 增加最小化自动化测试（Mapper/Service 级别）与 CI 校验（构建 + 格式 + 简单安全检查）
+
+### v1.2（API 优先与“前后端边界”清晰化）
+- 抽象并固化 API（版本化 `/api/v1/*`），将 UI 渲染从“强耦合 Controller”逐步转为“API + 视图薄层”
+- 引入权限模型升级（RBAC 权限点、操作审计日志），管理员写操作更可追溯
+- 增强数据能力：更强检索（组合条件/排序/导出列选择）与基础统计（热门图书、逾期风险、活跃读者）
+- 增加缓存策略（只读统计/字典类数据），减少重复查询与提升响应一致性
+
+### v2.0（架构级演进：现代化框架与前端工程化）
+- 升级到 Spring Boot 3 / Spring 6（Jakarta 命名空间），统一配置方式并提升生态兼容性
+- UI 从 JSP 迁移到现代前端工程（例如 React/Vue + Vite），配套 Tree-shaking / 资源哈希 / 分包加载
+- API 生成与契约化：OpenAPI/Swagger 自动生成、前后端契约校验与回归测试
+- 引入更完整的安全体系（CSRF/Rate-limit/会话策略/安全审计）与可观测性（指标 + Trace）
 
 ---
 

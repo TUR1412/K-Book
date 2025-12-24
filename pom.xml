@@ -16,7 +16,7 @@
         <mybatis.spring.version>2.1.2</mybatis.spring.version>
         <pagehelper.version>5.3.3</pagehelper.version>
         <mysql.driver.version>8.0.33</mysql.driver.version>
-        <druid.version>1.2.24</druid.version>
+        <hikari.version>5.1.0</hikari.version>
         <jackson.version>2.17.2</jackson.version>
         <slf4j.version>2.0.13</slf4j.version>
         <logback.version>1.4.14</logback.version>
@@ -114,11 +114,11 @@
             <artifactId>mysql-connector-j</artifactId>
             <version>${mysql.driver.version}</version>
         </dependency>
-        <!-- Druid 数据源 -->
+        <!-- HikariCP 数据源（体积更小，性能更稳） -->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>druid</artifactId>
-            <version>${druid.version}</version>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${hikari.version}</version>
         </dependency>
         <!-- Servlet API -->
         <dependency>

@@ -10,6 +10,12 @@ import org.springframework.web.servlet.ModelAndView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.itheima.util.InputSanitizers.normalizePageNum;
+import static com.itheima.util.InputSanitizers.normalizePageSize;
+import static com.itheima.util.InputSanitizers.normalizeText;
+import static com.itheima.util.InputSanitizers.trimToNull;
+
 @Controller
 @RequestMapping("/record")
 public class RecordController {
@@ -29,7 +35,7 @@ public class RecordController {
 @RequestMapping("/searchRecords")
 public ModelAndView searchRecords(Record record, HttpServletRequest request, Integer pageNum, Integer pageSize){
     pageNum = normalizePageNum(pageNum);
-    pageSize = normalizePageSize(pageSize);
+    pageSize = normalizePageSize(pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     //获取当前登录用户的信息
     User user = ((User) request.getSession().getAttribute("USER_SESSION"));
     if (user == null) {
@@ -65,39 +71,6 @@ private void sanitizeRecord(Record record) {
     record.setBookname(normalizeText(record.getBookname(), MAX_BOOKNAME_LEN));
     record.setBorrower(normalizeText(record.getBorrower(), MAX_BORROWER_LEN));
     record.setBookisbn(trimToNull(record.getBookisbn()));
-}
-
-private String normalizeText(String value, int maxLen) {
-    String trimmed = trimToNull(value);
-    if (trimmed == null) {
-        return null;
-    }
-    String collapsed = trimmed.replaceAll("\\\\s+", " ");
-    if (collapsed.length() > maxLen) {
-        return collapsed.substring(0, maxLen);
-    }
-    return collapsed;
-}
-
-private String trimToNull(String value) {
-    if (value == null) {
-        return null;
-    }
-    String trimmed = value.trim();
-    return trimmed.isEmpty() ? null : trimmed;
-}
-
-private int normalizePageNum(Integer pageNum) {
-    int num = pageNum == null ? 1 : pageNum;
-    return Math.max(num, 1);
-}
-
-private int normalizePageSize(Integer pageSize) {
-    int size = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
-    if (size < 1) {
-        return DEFAULT_PAGE_SIZE;
-    }
-    return Math.min(size, MAX_PAGE_SIZE);
 }
 }
 

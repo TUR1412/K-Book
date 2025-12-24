@@ -7,15 +7,13 @@ import com.itheima.domain.User;
 import com.itheima.mapper.BookMapper;
 import com.itheima.service.BookService;
 import com.itheima.service.RecordService;
+import com.itheima.util.DateTimes;
 import entity.PageResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,36 +61,20 @@ public Integer borrowBook(Book book) {
     if (!"0".equals(b.getStatus())) {
         return 0;
     }
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+    LocalDate today = LocalDate.now();
     //设置当天为借阅时间
-    book.setBorrowTime(dateFormat.format(new Date()));
+    book.setBorrowTime(DateTimes.formatIsoDate(today));
     //设置所借阅的图书状态为借阅中
     book.setStatus("1");
     //将图书的价格设置在book对象中
     book.setPrice(b.getPrice());
     //将图书的上架设置在book对象中
     book.setUploadTime(b.getUploadTime());
-    String returnTime = book.getReturnTime();
-    boolean validReturn = true;
-    if (returnTime == null || returnTime.trim().isEmpty()) {
-        validReturn = false;
-    } else {
-        try {
-            Date rt = dateFormat.parse(returnTime.trim());
-            Date today = new Date();
-            Date todayDate = dateFormat.parse(dateFormat.format(today));
-            if (rt.before(todayDate)) {
-                validReturn = false;
-            }
-        } catch (Exception ex) {
-            validReturn = false;
-        }
+    LocalDate returnDate = DateTimes.parseIsoDateOrNull(book.getReturnTime());
+    if (returnDate == null || returnDate.isBefore(today)) {
+        returnDate = today.plusDays(7);
     }
-    if (!validReturn) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DAY_OF_YEAR, 7);
-        book.setReturnTime(dateFormat.format(calendar.getTime()));
-    }
+    book.setReturnTime(DateTimes.formatIsoDate(returnDate));
     return bookMapper.editBook(book);
 }
 
@@ -114,9 +96,8 @@ public PageResult search(Book book, Integer pageNum, Integer pageSize) {
  * @param book 页面提交的新增图书信息
  */
 public Integer addBook(Book book) {
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     //设置新增图书的上架时间
-    book.setUploadTime(dateFormat.format(new Date()));
+    book.setUploadTime(DateTimes.todayIsoDate());
     if (book.getStatus() == null || book.getStatus().trim().isEmpty()) {
         book.setStatus("0");
     }
@@ -254,9 +235,8 @@ private Record setRecord(Book book){
     record.setBorrower(book.getBorrower());
     //设置借阅记录的借阅时间
     record.setBorrowTime(book.getBorrowTime());
-    DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
     //设置图书归还确认的当天为图书归还时间
-    record.setRemandTime(dateFormat.format(new Date()));
+    record.setRemandTime(DateTimes.todayIsoDate());
     return record;
 }
 }

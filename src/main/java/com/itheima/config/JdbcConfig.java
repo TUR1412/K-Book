@@ -1,6 +1,7 @@
 package com.itheima.config;
 
-import com.alibaba.druid.pool.DruidDataSource;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
@@ -27,20 +28,23 @@ public class JdbcConfig {
     private String password;
 
     /*定义dataSource的bean，
-    等同于<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+    等同于<bean id="dataSource" class="com.zaxxer.hikari.HikariDataSource">
      */
     @Bean("dataSource")
     public DataSource getDataSource(){
-        //创建对象
-        DruidDataSource ds = new DruidDataSource();
-        /*
-        等同于set属性注入<property name="driverClassName" value="driver"/>
-         */
-        ds.setDriverClassName(driver);
-        ds.setUrl(url);
-        ds.setUsername(userName);
-        ds.setPassword(password);
-        return ds;
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName(driver);
+        config.setJdbcUrl(url);
+        config.setUsername(userName);
+        config.setPassword(password);
+        config.setMaximumPoolSize(10);
+        config.setMinimumIdle(2);
+        config.setPoolName("kbook-hikari");
+        config.setConnectionTimeout(10_000);
+        config.setValidationTimeout(3_000);
+        config.setIdleTimeout(60_000);
+        config.setMaxLifetime(10 * 60_000);
+        return new HikariDataSource(config);
     }
 }
 

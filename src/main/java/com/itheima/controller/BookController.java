@@ -20,6 +20,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.Map;
 
+import static com.itheima.util.InputSanitizers.normalizePageNum;
+import static com.itheima.util.InputSanitizers.normalizePageSize;
+import static com.itheima.util.InputSanitizers.normalizeText;
+import static com.itheima.util.InputSanitizers.trimToNull;
+
 /*
 图书信息Controller
  */
@@ -119,7 +124,7 @@ public Result<Void> borrowBook(Book book, HttpSession session) {
 @RequestMapping("/search")
 public ModelAndView search(Book book, Integer pageNum, Integer pageSize, HttpServletRequest request) {
     pageNum = normalizePageNum(pageNum);
-    pageSize = normalizePageSize(pageSize);
+    pageSize = normalizePageSize(pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     sanitizeBook(book);
     //查询到的图书信息
     PageResult pageResult = bookService.search(book, pageNum, pageSize);
@@ -211,7 +216,7 @@ public Result<Void> editBook(Book book, HttpSession session) {
 @RequestMapping("/searchBorrowed")
 public ModelAndView searchBorrowed(Book book,Integer pageNum, Integer pageSize, HttpServletRequest request) {
     pageNum = normalizePageNum(pageNum);
-    pageSize = normalizePageSize(pageSize);
+    pageSize = normalizePageSize(pageSize, DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
     //获取当前登录的用户
     User user = (User) request.getSession().getAttribute("USER_SESSION");
     if (user == null) {
@@ -379,18 +384,6 @@ private Result<Void> validateBorrowRequest(Book book) {
     return null;
 }
 
-private String normalizeText(String value, int maxLen) {
-    String trimmed = trimToNull(value);
-    if (trimmed == null) {
-        return null;
-    }
-    String collapsed = trimmed.replaceAll("\\\\s+", " ");
-    if (collapsed.length() > maxLen) {
-        return collapsed.substring(0, maxLen);
-    }
-    return collapsed;
-}
-
 private String normalizeIsbn(String value) {
     String trimmed = trimToNull(value);
     if (trimmed == null) {
@@ -405,27 +398,6 @@ private String normalizeIsbn(String value) {
 
 private boolean isAdmin(User user) {
     return user != null && "ADMIN".equals(user.getRole());
-}
-
-private int normalizePageNum(Integer pageNum) {
-    int num = pageNum == null ? 1 : pageNum;
-    return Math.max(num, 1);
-}
-
-private int normalizePageSize(Integer pageSize) {
-    int size = pageSize == null ? DEFAULT_PAGE_SIZE : pageSize;
-    if (size < 1) {
-        return DEFAULT_PAGE_SIZE;
-    }
-    return Math.min(size, MAX_PAGE_SIZE);
-}
-
-private String trimToNull(String value) {
-    if (value == null) {
-        return null;
-    }
-    String trimmed = value.trim();
-    return trimmed.isEmpty() ? null : trimmed;
 }
 
 }
