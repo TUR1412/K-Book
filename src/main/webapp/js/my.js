@@ -14,21 +14,32 @@ function buildMessage(response, fallback) {
     return message;
 }
 
+function qs(selector, root) {
+    return (root || document).querySelector(selector);
+}
+
+function qsa(selector, root) {
+    return Array.prototype.slice.call((root || document).querySelectorAll(selector));
+}
+
 function setButtonLoading(button, isLoading, text) {
     if (!button) {
         return;
     }
-    var $btn = $(button);
     if (isLoading) {
         if (!button.dataset.originText) {
-            button.dataset.originText = $btn.text();
+            button.dataset.originText = button.textContent || "";
         }
-        $btn.text(text || "处理中...");
-        $btn.attr("disabled", true).addClass("is-loading");
-    } else {
-        $btn.text(button.dataset.originText || $btn.text());
-        $btn.attr("disabled", false).removeClass("is-loading");
+        button.textContent = text || "处理中...";
+        button.disabled = true;
+        button.classList.add("is-loading");
+        button.setAttribute("aria-busy", "true");
+        return;
     }
+    button.textContent = button.dataset.originText || button.textContent || "";
+    button.disabled = false;
+    button.classList.remove("is-loading");
+    button.removeAttribute("aria-busy");
 }
 
 function getProjectPath() {
@@ -36,24 +47,85 @@ function getProjectPath() {
         return window.__ctx;
     }
     var pathName = window.document.location.pathname;
-    return pathName.substring(0, pathName.substr(1).indexOf('/') + 1);
+    return pathName.substring(0, pathName.substr(1).indexOf("/") + 1);
 }
 
-function markInvalid($input, message) {
-    $input.addClass('input-invalid');
+function markInvalid(input, message) {
+    if (!input) {
+        return;
+    }
+    input.classList.add("input-invalid");
     if (message) {
-        notify(message, 'error');
+        notify(message, "error");
     }
 }
 
-function clearInvalid($input) {
-    $input.removeClass('input-invalid');
+function clearInvalid(input) {
+    if (!input) {
+        return;
+    }
+    input.classList.remove("input-invalid");
+}
+
+function serializeForm(form) {
+    var params = new URLSearchParams();
+    if (!form || !form.elements) {
+        return params;
+    }
+    Array.prototype.forEach.call(form.elements, function (el) {
+        if (!el || el.disabled || !el.name) {
+            return;
+        }
+        var type = (el.type || "").toLowerCase();
+        if ((type === "checkbox" || type === "radio") && !el.checked) {
+            return;
+        }
+        params.append(el.name, el.value == null ? "" : String(el.value));
+    });
+    return params;
+}
+
+function requestJson(url, options) {
+    var fetchOptions = options || {};
+    fetchOptions.headers = Object.assign(
+        {
+            "X-Requested-With": "XMLHttpRequest"
+        },
+        fetchOptions.headers || {}
+    );
+    return fetch(url, fetchOptions).then(function (res) {
+        if (!res.ok) {
+            throw new Error("HTTP " + res.status);
+        }
+        return res.json();
+    });
+}
+
+function getJson(url) {
+    return requestJson(url, { method: "GET", credentials: "same-origin" });
+}
+
+function postForm(url, form) {
+    var body = serializeForm(form).toString();
+    return requestJson(url, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+        },
+        body: body
+    });
 }
 
 function cg() {
-    var dateStr = $("#time").val();
+    var dateInput = qs("#time");
+    var saveButton = qs("#savemsg");
+    if (!dateInput || !saveButton) {
+        return;
+    }
+    var dateStr = dateInput.value;
     if (!dateStr) {
-        $("#savemsg").attr("disabled", true);
+        saveButton.disabled = true;
         return;
     }
     var selected = new Date(dateStr + "T00:00:00");
@@ -61,113 +133,171 @@ function cg() {
     today.setHours(0, 0, 0, 0);
     if (selected < today) {
         notify("归还日期不能早于今天。", "error");
-        $("#savemsg").attr("disabled", true);
+        saveButton.disabled = true;
         return;
     }
-    $("#savemsg").attr("disabled", false);
+    saveButton.disabled = false;
 }
 
 function borrow(button) {
     var url = getProjectPath() + "/book/borrowBook";
+    var form = qs("#borrowBook");
+    if (!form) {
+        notify("借阅表单未找到。", "error");
+        return;
+    }
     setButtonLoading(button, true, "提交中...");
-    $.post(url, $("#borrowBook").serialize(), function (response) {
-        if (response && response.success === true) {
-            notify(buildMessage(response, "借阅成功，请到行政中心取书。"), "success");
-            setTimeout(function () {
-                window.location.href = getProjectPath() + "/book/search";
-            }, 700);
-            return;
-        }
-        setButtonLoading(button, false);
-        notify(buildMessage(response, "借阅失败，请稍后再试。"), "error");
-    }).fail(function () {
-        setButtonLoading(button, false);
-        notify("网络繁忙，请稍后再试。", "error");
-    });
-}
-
-function resetFrom() {
-    $("#aoe").attr("disabled", true);
-    var $vals = $("#addOrEditBook input");
-    $vals.each(function () {
-        $(this).val("").removeClass("input-invalid");
-    });
-}
-
-function resetStyle() {
-    $("#aoe").attr("disabled", false);
-    var $vals = $("#addOrEditBook input");
-    $vals.each(function () {
-        $(this).removeClass("input-invalid");
-    });
-}
-
-function findBookById(id, doname) {
-    resetStyle();
-    var url = getProjectPath() + "/book/findById?id=" + id;
-    $.get(url, function (response) {
-        if (!response || response.success !== true) {
-            notify(buildMessage(response, "查询图书失败，请稍后再试。"), "error");
-            return;
-        }
-        if (doname === 'edit') {
-            $("#ebid").val(response.data.id);
-            $("#ebname").val(response.data.name);
-            $("#ebisbn").val(response.data.isbn);
-            $("#ebpress").val(response.data.press);
-            $("#ebauthor").val(response.data.author);
-            $("#ebpagination").val(response.data.pagination);
-            $("#ebprice").val(response.data.price);
-            $("#ebstatus").val(response.data.status);
-        }
-        if (doname === 'borrow') {
-            $("#savemsg").attr("disabled", true);
-            $("#time").val("");
-            var today = new Date();
-            var month = String(today.getMonth() + 1).padStart(2, "0");
-            var day = String(today.getDate()).padStart(2, "0");
-            $("#time").attr("min", today.getFullYear() + "-" + month + "-" + day);
-            var target = new Date();
-            target.setDate(target.getDate() + 7);
-            var tMonth = String(target.getMonth() + 1).padStart(2, "0");
-            var tDay = String(target.getDate()).padStart(2, "0");
-            $("#time").val(target.getFullYear() + "-" + tMonth + "-" + tDay);
-            cg();
-            $("#bid").val(response.data.id);
-            $("#bname").val(response.data.name);
-            $("#bisbn").val(response.data.isbn);
-            $("#bpress").val(response.data.press);
-            $("#bauthor").val(response.data.author);
-            $("#bpagination").val(response.data.pagination);
-        }
-    }).fail(function () {
-        notify("网络繁忙，请稍后再试。", "error");
-    });
-}
-
-function addOrEdit(button) {
-    var ebid = $("#ebid").val();
-    if (ebid > 0) {
-        var url = getProjectPath() + "/book/editBook";
-        setButtonLoading(button, true, "保存中...");
-        $.post(url, $("#addOrEditBook").serialize(), function (response) {
+    postForm(url, form)
+        .then(function (response) {
             if (response && response.success === true) {
-                notify(buildMessage(response, "编辑成功！"), "success");
+                notify(buildMessage(response, "借阅成功，请到行政中心取书。"), "success");
                 setTimeout(function () {
                     window.location.href = getProjectPath() + "/book/search";
                 }, 700);
                 return;
             }
             setButtonLoading(button, false);
-            notify(buildMessage(response, "编辑失败，请稍后再试。"), "error");
-        }).fail(function () {
+            notify(buildMessage(response, "借阅失败，请稍后再试。"), "error");
+        })
+        .catch(function () {
             setButtonLoading(button, false);
             notify("网络繁忙，请稍后再试。", "error");
         });
-    } else {
-        var createUrl = getProjectPath() + "/book/addBook";
+}
+
+function resetFrom() {
+    var save = qs("#aoe");
+    if (save) {
+        save.disabled = true;
+    }
+    var inputs = qsa("#addOrEditBook input");
+    inputs.forEach(function (input) {
+        input.value = "";
+        input.classList.remove("input-invalid");
+    });
+}
+
+function resetStyle() {
+    var save = qs("#aoe");
+    if (save) {
+        save.disabled = false;
+    }
+    var inputs = qsa("#addOrEditBook input");
+    inputs.forEach(function (input) {
+        input.classList.remove("input-invalid");
+    });
+}
+
+function findBookById(id, doname) {
+    resetStyle();
+    var safeId = String(id || "").trim();
+    if (!safeId) {
+        notify("图书ID无效。", "error");
+        return;
+    }
+    var url = getProjectPath() + "/book/findById?id=" + encodeURIComponent(safeId);
+    getJson(url)
+        .then(function (response) {
+            if (!response || response.success !== true) {
+                notify(buildMessage(response, "查询图书失败，请稍后再试。"), "error");
+                return;
+            }
+            if (!response.data) {
+                notify(buildMessage(response, "未找到对应图书。"), "error");
+                return;
+            }
+            if (doname === "edit") {
+                var map = {
+                    ebid: response.data.id,
+                    ebname: response.data.name,
+                    ebisbn: response.data.isbn,
+                    ebpress: response.data.press,
+                    ebauthor: response.data.author,
+                    ebpagination: response.data.pagination,
+                    ebprice: response.data.price,
+                    ebstatus: response.data.status
+                };
+                Object.keys(map).forEach(function (key) {
+                    var el = qs("#" + key);
+                    if (el) {
+                        el.value = map[key] == null ? "" : String(map[key]);
+                    }
+                });
+                return;
+            }
+            if (doname === "borrow") {
+                var saveButton = qs("#savemsg");
+                if (saveButton) {
+                    saveButton.disabled = true;
+                }
+                var time = qs("#time");
+                if (time) {
+                    time.value = "";
+                    var today = new Date();
+                    var month = String(today.getMonth() + 1).padStart(2, "0");
+                    var day = String(today.getDate()).padStart(2, "0");
+                    time.min = today.getFullYear() + "-" + month + "-" + day;
+                    var target = new Date();
+                    target.setDate(target.getDate() + 7);
+                    var tMonth = String(target.getMonth() + 1).padStart(2, "0");
+                    var tDay = String(target.getDate()).padStart(2, "0");
+                    time.value = target.getFullYear() + "-" + tMonth + "-" + tDay;
+                }
+                cg();
+                var borrowMap = {
+                    bid: response.data.id,
+                    bname: response.data.name,
+                    bisbn: response.data.isbn,
+                    bpress: response.data.press,
+                    bauthor: response.data.author,
+                    bpagination: response.data.pagination
+                };
+                Object.keys(borrowMap).forEach(function (key) {
+                    var el = qs("#" + key);
+                    if (el) {
+                        el.value = borrowMap[key] == null ? "" : String(borrowMap[key]);
+                    }
+                });
+            }
+        })
+        .catch(function () {
+            notify("网络繁忙，请稍后再试。", "error");
+        });
+}
+
+function addOrEdit(button) {
+    var idInput = qs("#ebid");
+    var form = qs("#addOrEditBook");
+    if (!form) {
+        notify("图书表单未找到。", "error");
+        return;
+    }
+    var ebid = idInput && idInput.value ? parseInt(idInput.value, 10) : 0;
+    if (ebid > 0) {
+        var url = getProjectPath() + "/book/editBook";
         setButtonLoading(button, true, "保存中...");
-        $.post(createUrl, $("#addOrEditBook").serialize(), function (response) {
+        postForm(url, form)
+            .then(function (response) {
+                if (response && response.success === true) {
+                    notify(buildMessage(response, "编辑成功！"), "success");
+                    setTimeout(function () {
+                        window.location.href = getProjectPath() + "/book/search";
+                    }, 700);
+                    return;
+                }
+                setButtonLoading(button, false);
+                notify(buildMessage(response, "编辑失败，请稍后再试。"), "error");
+            })
+            .catch(function () {
+                setButtonLoading(button, false);
+                notify("网络繁忙，请稍后再试。", "error");
+            });
+        return;
+    }
+    var createUrl = getProjectPath() + "/book/addBook";
+    setButtonLoading(button, true, "保存中...");
+    postForm(createUrl, form)
+        .then(function (response) {
             if (response && response.success === true) {
                 notify(buildMessage(response, "新增图书成功！"), "success");
                 setTimeout(function () {
@@ -177,11 +307,11 @@ function addOrEdit(button) {
             }
             setButtonLoading(button, false);
             notify(buildMessage(response, "新增失败，请稍后再试。"), "error");
-        }).fail(function () {
+        })
+        .catch(function () {
             setButtonLoading(button, false);
             notify("网络繁忙，请稍后再试。", "error");
         });
-    }
 }
 
 function returnBook(bid, button) {
@@ -190,22 +320,29 @@ function returnBook(bid, button) {
         notify("已取消归还操作。", "info");
         return;
     }
-    var url = getProjectPath() + "/book/returnBook?id=" + bid;
+    var safeId = String(bid || "").trim();
+    if (!safeId) {
+        notify("图书ID无效。", "error");
+        return;
+    }
+    var url = getProjectPath() + "/book/returnBook?id=" + encodeURIComponent(safeId);
     setButtonLoading(button, true, "提交中...");
-    $.get(url, function (response) {
-        if (response && response.success === true) {
-            notify(buildMessage(response, "归还申请已提交。"), "success");
-            setTimeout(function () {
-                window.location.href = getProjectPath() + "/book/searchBorrowed";
-            }, 700);
-            return;
-        }
-        setButtonLoading(button, false);
-        notify(buildMessage(response, "归还失败，请稍后再试。"), "error");
-    }).fail(function () {
-        setButtonLoading(button, false);
-        notify("网络繁忙，请稍后再试。", "error");
-    });
+    getJson(url)
+        .then(function (response) {
+            if (response && response.success === true) {
+                notify(buildMessage(response, "归还申请已提交。"), "success");
+                setTimeout(function () {
+                    window.location.href = getProjectPath() + "/book/searchBorrowed";
+                }, 700);
+                return;
+            }
+            setButtonLoading(button, false);
+            notify(buildMessage(response, "归还失败，请稍后再试。"), "error");
+        })
+        .catch(function () {
+            setButtonLoading(button, false);
+            notify("网络繁忙，请稍后再试。", "error");
+        });
 }
 
 function returnConfirm(bid, button) {
@@ -214,78 +351,105 @@ function returnConfirm(bid, button) {
         notify("已取消归还确认。", "info");
         return;
     }
-    var url = getProjectPath() + "/book/returnConfirm?id=" + bid;
+    var safeId = String(bid || "").trim();
+    if (!safeId) {
+        notify("图书ID无效。", "error");
+        return;
+    }
+    var url = getProjectPath() + "/book/returnConfirm?id=" + encodeURIComponent(safeId);
     setButtonLoading(button, true, "确认中...");
-    $.get(url, function (response) {
-        if (response && response.success === true) {
-            notify(buildMessage(response, "确认成功！"), "success");
-            setTimeout(function () {
-                window.location.href = getProjectPath() + "/book/searchBorrowed";
-            }, 700);
-            return;
-        }
-        setButtonLoading(button, false);
-        notify(buildMessage(response, "确认失败，请稍后再试。"), "error");
-    }).fail(function () {
-        setButtonLoading(button, false);
-        notify("网络繁忙，请稍后再试。", "error");
-    });
+    getJson(url)
+        .then(function (response) {
+            if (response && response.success === true) {
+                notify(buildMessage(response, "确认成功！"), "success");
+                setTimeout(function () {
+                    window.location.href = getProjectPath() + "/book/searchBorrowed";
+                }, 700);
+                return;
+            }
+            setButtonLoading(button, false);
+            notify(buildMessage(response, "确认失败，请稍后再试。"), "error");
+        })
+        .catch(function () {
+            setButtonLoading(button, false);
+            notify("网络繁忙，请稍后再试。", "error");
+        });
 }
 
 function checkval() {
-    var $inputs = $("#addOrEditBook input");
+    var inputs = qsa("#addOrEditBook input");
     var invalid = false;
-    $inputs.each(function () {
-        if ($(this).val() === '' || $(this).hasClass('input-invalid')) {
+    inputs.forEach(function (input) {
+        if (!input.value || input.classList.contains("input-invalid")) {
             invalid = true;
         }
     });
-    if (!invalid) {
-        $("#aoe").attr("disabled", false);
+    var save = qs("#aoe");
+    if (save) {
+        save.disabled = invalid;
     }
 }
 
-$(function () {
-    if (!window.jQuery) {
+function bindBookFormEnhancements() {
+    var pagination = qs("#ebpagination");
+    if (pagination) {
+        pagination.addEventListener("input", function () {
+            this.value = this.value.replace(/\D/g, "");
+        });
+    }
+    var price = qs("#ebprice");
+    if (price) {
+        price.addEventListener("input", function () {
+            var cleaned = this.value.replace(/[^0-9.]/g, "");
+            var parts = cleaned.split(".");
+            if (parts.length > 2) {
+                cleaned = parts[0] + "." + parts.slice(1).join("");
+            }
+            this.value = cleaned;
+        });
+    }
+
+    var inputs = qsa("#addOrEditBook input");
+    if (!inputs.length) {
         return;
     }
-    $("#ebpagination").on("input", function () {
-        this.value = this.value.replace(/\D/g, "");
-    });
-    $("#ebprice").on("input", function () {
-        var cleaned = this.value.replace(/[^0-9.]/g, "");
-        var parts = cleaned.split(".");
-        if (parts.length > 2) {
-            cleaned = parts[0] + "." + parts.slice(1).join("");
-        }
-        this.value = cleaned;
-    });
-    var $inputs = $("#addOrEditBook input");
+
     var lastIsbn = "";
-    $inputs.each(function () {
-        $(this).blur(function () {
-            var value = $(this).val();
+    inputs.forEach(function (input) {
+        input.addEventListener("blur", function () {
+            var value = input.value;
             if (!value) {
-                $("#aoe").attr("disabled", true);
-                markInvalid($(this), "该字段不能为空。");
+                var save = qs("#aoe");
+                if (save) {
+                    save.disabled = true;
+                }
+                markInvalid(input, "该字段不能为空。");
                 return;
             }
-            if ($(this).attr("name") === "isbn" && lastIsbn !== value) {
+            if (input.name === "isbn" && lastIsbn !== value) {
                 if (!/^\d{13}$/.test(value)) {
-                    $("#aoe").attr("disabled", true);
-                    markInvalid($(this), "ISBN 必须为 13 位数字。");
+                    var saveBtn = qs("#aoe");
+                    if (saveBtn) {
+                        saveBtn.disabled = true;
+                    }
+                    markInvalid(input, "ISBN 必须为 13 位数字。");
                     return;
                 }
             }
-            clearInvalid($(this));
+            clearInvalid(input);
             checkval();
-        }).focus(function () {
-            clearInvalid($(this));
-            if ($(this).attr("name") === "isbn") {
-                lastIsbn = $(this).val();
+        });
+        input.addEventListener("focus", function () {
+            clearInvalid(input);
+            if (input.name === "isbn") {
+                lastIsbn = input.value;
             }
         });
     });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    bindBookFormEnhancements();
 });
 
 var pageargs = {

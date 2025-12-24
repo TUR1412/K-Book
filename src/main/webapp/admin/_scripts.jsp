@@ -3,7 +3,5 @@
 <script>
     window.__ctx = '${pageContext.request.contextPath}';
 </script>
-<script src="${ctx}/js/jquery.min.js?v=${appVersion}"></script>
-<script src="${ctx}/js/bootstrap.js?v=${appVersion}"></script>
 <script src="${ctx}/js/app.js?v=${appVersion}"></script>
 <script src="${ctx}/js/my.js?v=${appVersion}"></script>

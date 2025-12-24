@@ -4,6 +4,7 @@ import com.itheima.domain.User;
 import com.itheima.service.BookService;
 import entity.PageResult;
 import entity.Result;
+import entity.Results;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,16 +62,16 @@ public Result<Book> findById(String id) {
     try {
         String safeId = trimToNull(id);
         if (safeId == null || !safeId.matches("\\\\d+")) {
-            return new Result(false,"图书ID无效！").withActionableSuggestion("请从列表重新选择图书。");
+            return Results.fail("图书ID无效！", "请从列表重新选择图书。");
         }
         Book book=bookService.findById(safeId);
         if(book==null){
-            return new Result(false,"未找到对应图书。").withActionableSuggestion("请确认图书未被下架或已删除。");
+            return Results.fail("未找到对应图书。", "请确认图书未被下架或已删除。");
         }
-        return new Result(true,"查询图书成功",book);
+        return Results.ok("查询图书成功", book);
     }catch (Exception e){
         logger.error("查询图书失败", e);
-        return new Result(false,"查询图书失败！").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("查询图书失败！", "请稍后重试或联系管理员。");
     }
 }
 /**
@@ -80,17 +81,17 @@ public Result<Book> findById(String id) {
  */
 @ResponseBody
 @RequestMapping("/borrowBook")
-public Result borrowBook(Book book, HttpSession session) {
+public Result<Void> borrowBook(Book book, HttpSession session) {
     //获取当前登录的用户姓名
     User user = (User) session.getAttribute("USER_SESSION");
     if (user == null) {
-        return new Result(false, "登录已过期。").withActionableSuggestion("请重新登录后再试。");
+        return Results.fail("登录已过期。", "请重新登录后再试。");
     }
     if (book == null || book.getId() == null || book.getId() <= 0) {
-        return new Result(false, "请选择需要借阅的图书。").withActionableSuggestion("请从列表重新发起借阅。");
+        return Results.fail("请选择需要借阅的图书。", "请从列表重新发起借阅。");
     }
     sanitizeBook(book);
-    Result validation = validateBorrowRequest(book);
+    Result<Void> validation = validateBorrowRequest(book);
     if (validation != null) {
         return validation;
     }
@@ -100,12 +101,12 @@ public Result borrowBook(Book book, HttpSession session) {
         //根据图书的id和用户进行图书借阅
         Integer count = bookService.borrowBook(book);
         if (count != 1) {
-            return new Result(false, "借阅图书失败!").withActionableSuggestion("请检查图书是否可借阅，或稍后再试。");
+            return Results.fail("借阅图书失败!", "请检查图书是否可借阅，或稍后再试。");
         }
-        return new Result(true, "借阅成功，请到行政中心取书!");
+        return Results.ok("借阅成功，请到行政中心取书!");
     } catch (Exception e) {
         logger.error("借阅图书失败", e);
-        return new Result(false, "借阅图书失败!").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("借阅图书失败!", "请稍后重试或联系管理员。");
     }
 }
 
@@ -142,28 +143,28 @@ public ModelAndView search(Book book, Integer pageNum, Integer pageSize, HttpSer
  */
 @ResponseBody
 @RequestMapping("/addBook")
-public Result addBook(Book book, HttpSession session) {
+public Result<Void> addBook(Book book, HttpSession session) {
     try {
         User user = session == null ? null : (User) session.getAttribute("USER_SESSION");
         if (!isAdmin(user)) {
-            return new Result(false, "无权限操作。").withActionableSuggestion("请使用管理员账号。");
+            return Results.fail("无权限操作。", "请使用管理员账号。");
         }
         if (book == null) {
-            return new Result(false, "新增图书失败!").withActionableSuggestion("请确认表单已填写完整。");
+            return Results.fail("新增图书失败!", "请确认表单已填写完整。");
         }
         sanitizeBook(book);
-        Result validate = validateBookPayload(book, false);
+        Result<Void> validate = validateBookPayload(book, false);
         if (validate != null) {
             return validate;
         }
         Integer count=bookService.addBook(book);
         if(count!=1){
-            return new Result(false, "新增图书失败!").withActionableSuggestion("请检查必填字段并重试。");
+            return Results.fail("新增图书失败!", "请检查必填字段并重试。");
         }
-        return new Result(true, "新增图书成功!");
+        return Results.ok("新增图书成功!");
     }catch (Exception e){
         logger.error("新增图书失败", e);
-        return new Result(false, "新增图书失败!").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("新增图书失败!", "请稍后重试或联系管理员。");
     }
 }
 
@@ -173,17 +174,17 @@ public Result addBook(Book book, HttpSession session) {
  */
 @ResponseBody
 @RequestMapping("/editBook")
-public Result editBook(Book book, HttpSession session) {
+public Result<Void> editBook(Book book, HttpSession session) {
     try {
         User user = session == null ? null : (User) session.getAttribute("USER_SESSION");
         if (!isAdmin(user)) {
-            return new Result(false, "无权限操作。").withActionableSuggestion("请使用管理员账号。");
+            return Results.fail("无权限操作。", "请使用管理员账号。");
         }
         if (book == null || book.getId() == null) {
-            return new Result(false, "编辑失败!").withActionableSuggestion("请从列表重新选择图书。");
+            return Results.fail("编辑失败!", "请从列表重新选择图书。");
         }
         sanitizeBook(book);
-        Result validate = validateBookPayload(book, true);
+        Result<Void> validate = validateBookPayload(book, true);
         if (validate != null) {
             return validate;
         }
@@ -193,12 +194,12 @@ public Result editBook(Book book, HttpSession session) {
         }
         Integer count= bookService.editBook(book);
         if(count!=1){
-            return new Result(false, "编辑失败!").withActionableSuggestion("请检查输入并重试。");
+            return Results.fail("编辑失败!", "请检查输入并重试。");
         }
-        return new Result(true, "编辑成功!");
+        return Results.ok("编辑成功!");
     }catch (Exception e){
         logger.error("编辑图书失败", e);
-        return new Result(false, "编辑失败!").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("编辑失败!", "请稍后重试或联系管理员。");
     }
 }
 
@@ -237,25 +238,25 @@ public ModelAndView searchBorrowed(Book book,Integer pageNum, Integer pageSize, 
  */
 @ResponseBody
 @RequestMapping("/returnBook")
-public Result returnBook(String id, HttpSession session) {
+public Result<Void> returnBook(String id, HttpSession session) {
     //获取当前登录的用户信息
     User user = (User) session.getAttribute("USER_SESSION");
     if (user == null) {
-        return new Result(false, "登录已过期。").withActionableSuggestion("请重新登录后再试。");
+        return Results.fail("登录已过期。", "请重新登录后再试。");
     }
     String safeId = trimToNull(id);
     if (safeId == null || !safeId.matches("\\\\d+")) {
-        return new Result(false, "图书ID无效!").withActionableSuggestion("请从列表重新选择图书。");
+        return Results.fail("图书ID无效!", "请从列表重新选择图书。");
     }
     try {
         boolean flag = bookService.returnBook(safeId, user);
         if (!flag) {
-            return new Result(false, "还书失败!").withActionableSuggestion("请确认借阅人与当前账号一致。");
+            return Results.fail("还书失败!", "请确认借阅人与当前账号一致。");
         }
-        return new Result(true, "还书确认中，请先到行政中心还书!");
+        return Results.ok("还书确认中，请先到行政中心还书!");
     }catch (Exception e){
         logger.error("归还图书失败", e);
-        return new Result(false, "还书失败!").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("还书失败!", "请稍后重试或联系管理员。");
     }
 }
 
@@ -265,24 +266,24 @@ public Result returnBook(String id, HttpSession session) {
  */
 @ResponseBody
 @RequestMapping("/returnConfirm")
-public Result returnConfirm(String id, HttpSession session) {
+public Result<Void> returnConfirm(String id, HttpSession session) {
     try {
         User user = session == null ? null : (User) session.getAttribute("USER_SESSION");
         if (!isAdmin(user)) {
-            return new Result(false, "无权限操作。").withActionableSuggestion("请使用管理员账号。");
+            return Results.fail("无权限操作。", "请使用管理员账号。");
         }
         String safeId = trimToNull(id);
         if (safeId == null || !safeId.matches("\\\\d+")) {
-            return new Result(false, "确认失败!").withActionableSuggestion("请从列表重新选择图书。");
+            return Results.fail("确认失败!", "请从列表重新选择图书。");
         }
         Integer count=bookService.returnConfirm(safeId);
         if(count!=1){
-            return new Result(false, "确认失败!").withActionableSuggestion("请确认图书状态为归还中。");
+            return Results.fail("确认失败!", "请确认图书状态为归还中。");
         }
-        return new Result(true, "确认成功!");
+        return Results.ok("确认成功!");
     }catch (Exception e){
         logger.error("归还确认失败", e);
-        return new Result(false, "确认失败!").withActionableSuggestion("请稍后重试或联系管理员。");
+        return Results.fail("确认失败!", "请稍后重试或联系管理员。");
     }
 }
 
@@ -294,14 +295,14 @@ public Result returnConfirm(String id, HttpSession session) {
 public Result<Map<String, Integer>> summary(HttpSession session) {
     User user = (User) session.getAttribute("USER_SESSION");
     if (user == null) {
-        return new Result(false, "登录已过期。").withActionableSuggestion("请重新登录后刷新页面。");
+        return Results.fail("登录已过期。", "请重新登录后刷新页面。");
     }
     try {
         Map<String, Integer> data = bookService.getSummary(user);
-        return new Result(true, "查询成功", data);
+        return Results.ok("查询成功", data);
     } catch (Exception e) {
         logger.error("获取仪表盘摘要失败", e);
-        return new Result(false, "获取摘要失败。").withActionableSuggestion("请稍后重试。");
+        return Results.fail("获取摘要失败。", "请稍后重试。");
     }
 }
 
@@ -318,27 +319,27 @@ private void sanitizeBook(Book book) {
     book.setReturnTime(trimToNull(book.getReturnTime()));
 }
 
-private Result validateBookPayload(Book book, boolean requireId) {
+private Result<Void> validateBookPayload(Book book, boolean requireId) {
     if (requireId && book.getId() == null) {
-        return new Result(false, "图书信息不完整。").withActionableSuggestion("请刷新页面后重试。");
+        return Results.fail("图书信息不完整。", "请刷新页面后重试。");
     }
     if (trimToNull(book.getName()) == null) {
-        return new Result(false, "图书名称不能为空。").withActionableSuggestion("请填写图书名称。");
+        return Results.fail("图书名称不能为空。", "请填写图书名称。");
     }
     if (trimToNull(book.getIsbn()) == null || !book.getIsbn().matches("\\\\d{13}")) {
-        return new Result(false, "ISBN 必须为 13 位数字。").withActionableSuggestion("请检查 ISBN 是否完整。");
+        return Results.fail("ISBN 必须为 13 位数字。", "请检查 ISBN 是否完整。");
     }
     if (trimToNull(book.getPress()) == null) {
-        return new Result(false, "出版社不能为空。").withActionableSuggestion("请填写出版社。");
+        return Results.fail("出版社不能为空。", "请填写出版社。");
     }
     if (trimToNull(book.getAuthor()) == null) {
-        return new Result(false, "作者不能为空。").withActionableSuggestion("请填写作者信息。");
+        return Results.fail("作者不能为空。", "请填写作者信息。");
     }
     if (book.getPagination() == null || book.getPagination() <= 0) {
-        return new Result(false, "页数必须大于 0。").withActionableSuggestion("请填写正确页数。");
+        return Results.fail("页数必须大于 0。", "请填写正确页数。");
     }
     if (book.getPrice() == null || book.getPrice() < 0) {
-        return new Result(false, "价格不能为负数。").withActionableSuggestion("请填写正确价格。");
+        return Results.fail("价格不能为负数。", "请填写正确价格。");
     }
     String status = trimToNull(book.getStatus());
     if (status == null) {
@@ -351,29 +352,29 @@ private Result validateBookPayload(Book book, boolean requireId) {
     return null;
 }
 
-private Result validateBorrowRequest(Book book) {
+private Result<Void> validateBorrowRequest(Book book) {
     if (book.getId() == null || book.getId() <= 0) {
-        return new Result(false, "请选择需要借阅的图书。").withActionableSuggestion("请从列表重新发起借阅。");
+        return Results.fail("请选择需要借阅的图书。", "请从列表重新发起借阅。");
     }
     String returnTime = trimToNull(book.getReturnTime());
     if (returnTime == null) {
-        return new Result(false, "请选择归还日期。").withActionableSuggestion("请在借阅弹窗内选择归还日期。");
+        return Results.fail("请选择归还日期。", "请在借阅弹窗内选择归还日期。");
     }
     if (!returnTime.matches("\\\\d{4}-\\\\d{2}-\\\\d{2}")) {
-        return new Result(false, "归还日期格式不正确。").withActionableSuggestion("请选择正确的归还日期。");
+        return Results.fail("归还日期格式不正确。", "请选择正确的归还日期。");
     }
     try {
         LocalDate selected = LocalDate.parse(returnTime, DATE_FORMAT);
         LocalDate today = LocalDate.now();
         if (selected.isBefore(today)) {
-            return new Result(false, "归还日期不能早于今天。").withActionableSuggestion("请重新选择归还日期。");
+            return Results.fail("归还日期不能早于今天。", "请重新选择归还日期。");
         }
         if (selected.isAfter(today.plusDays(MAX_BORROW_DAYS))) {
-            return new Result(false, "归还日期过远。").withActionableSuggestion("请选择 90 天内的日期。");
+            return Results.fail("归还日期过远。", "请选择 90 天内的日期。");
         }
         book.setReturnTime(returnTime);
     } catch (DateTimeParseException e) {
-        return new Result(false, "归还日期解析失败。").withActionableSuggestion("请重新选择日期。");
+        return Results.fail("归还日期解析失败。", "请重新选择日期。");
     }
     return null;
 }

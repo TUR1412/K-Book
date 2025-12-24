@@ -79,7 +79,7 @@ DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`  (
   `user_id` int(32) NOT NULL AUTO_INCREMENT COMMENT '用户id',
   `user_name` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户名称',
-  `user_password` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户密码',
+  `user_password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户密码（pbkdf2_sha256$iterations$salt$hash）',
   `user_email` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户邮箱（用户账号）',
   `user_role` varchar(32) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户角色',
   `user_status` varchar(1) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '用户状态（0:正常,1:禁用）',
@@ -89,7 +89,7 @@ CREATE TABLE `user`  (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, '黑马程序员', '', 'itheima@itcast.cn', 'ADMIN', '0');
-INSERT INTO `user` VALUES (2, '张三', '', 'zhangsan@itcast.cn', 'USER', '0');
+INSERT INTO `user` VALUES (1, '黑马程序员', 'pbkdf2_sha256$210000$jeZblbpI1sFpsq1Bl3JsNw==$LAtUFyG9PdOOxmmRHRU+wMnLFLNQbC1Uk/Fk1WKMt18=', 'itheima@itcast.cn', 'ADMIN', '0');
+INSERT INTO `user` VALUES (2, '张三', 'pbkdf2_sha256$210000$tubwPMvXXxI36T+XfM92IA==$+I/WUA7CfK5r8uKcWvDw+AnEwC+rMvTPfh2v0fMpJI4=', 'zhangsan@itcast.cn', 'USER', '0');
 
 SET FOREIGN_KEY_CHECKS = 1;

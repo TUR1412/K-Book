@@ -3,6 +3,10 @@
 本项目遵循语义化版本与可读变更记录。
 
 ## [Unreleased]
+- Frontend: 移除 jQuery/Bootstrap 运行时依赖，改为原生 JS（fetch + 事件委托）与自研 Modal
+- Security: 登录口令升级为 PBKDF2-SHA256（支持旧明文自动升级），并清理部署脚本中的明文 Token
+- Build: 引入 Maven Wrapper，升级 Spring/MyBatis/Jackson 等依赖并将日志框架切换为 Logback
+- Deploy: Dockerfile 升级到 Tomcat 9 + JDK 17，CI 使用 Wrapper 构建
 - UI：快捷键帮助、筛选计数与登录体验强化
 - A11y：分页 aria-current 与键盘交互完善
 - Security：基础响应头默认启用

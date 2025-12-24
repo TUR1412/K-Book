@@ -6,9 +6,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>云借阅 - 登录</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/app.css?v=${appVersion}"/>
     <link rel="stylesheet" type="text/css" href="${pageContext.request.contextPath}/css/login.css?v=${appVersion}"/>
 </head>

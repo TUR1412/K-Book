@@ -3,8 +3,10 @@ import com.itheima.domain.User;
 import org.apache.ibatis.annotations.Result;
 import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Param;
 public interface UserMapper{
-    @Select("select * from user where user_email=#{email} AND user_password=#{password} AND user_status!='1'")
+    @Select("select * from user where user_email=#{email} AND (user_status IS NULL OR user_status!='1') limit 1")
     @Results(id = "userMap",value = {
             //id字段默认为false，表示不是主键
             //column表示数据库表字段，property表示实体类属性名。
@@ -15,5 +17,8 @@ public interface UserMapper{
             @Result(column = "user_role",property = "role"),
             @Result(column = "user_status",property = "status")
     })
-    User login(User user);
+    User findByEmail(@Param("email") String email);
+
+    @Update("update user set user_password=#{password} where user_id=#{id}")
+    int updatePassword(@Param("id") Integer id, @Param("password") String password);
 }

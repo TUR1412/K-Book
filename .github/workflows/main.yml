@@ -23,4 +23,6 @@ jobs:
           cache: maven
 
       - name: Build (skip tests)
-        run: mvn -B -DskipTests package
+        run: |
+          chmod +x mvnw
+          ./mvnw -B -DskipTests package

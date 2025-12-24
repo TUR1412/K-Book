@@ -9,10 +9,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>${param.pageTitle} | 云借阅</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="${ctx}/css/bootstrap.css?v=${appVersion}">
     <link rel="stylesheet" href="${ctx}/css/app.css?v=${appVersion}">
     <link rel="stylesheet" href="${ctx}/css/pagination.css?v=${appVersion}">
 </head>

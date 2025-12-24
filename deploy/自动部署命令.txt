@@ -1,16 +1,17 @@
 cd /home
 
-# 停止并删除当前运行的 Docker Compose 服务
-docker-compose down
+# ⚠️ 注意：以下命令会影响服务器 Docker 运行环境，请在确认影响范围后执行。
 
-# 强制删除所有已停止或运行的 Docker 容器
-docker rm -f $(docker ps -aq)
+# 停止并删除当前运行的 Docker Compose 服务（按需）
+docker compose down
 
-# 删除所有 Docker 镜像
-docker rmi -f $(docker images -q)
+# 如需“清空环境”请谨慎开启（可能误删其他业务容器/镜像）
+# docker rm -f $(docker ps -aq)
+# docker rmi -f $(docker images -q)
 
-# 登录到 Docker 仓库 需要替换
-docker login -u myapp-1727187050227 -p 9436e81350d102f98f99b6ce1c671b3ebfbb70f4 serverless-100015709299-docker.pkg.coding.net
+# 登录到 Docker 仓库（请勿在仓库中保存明文口令/Token）
+# 建议使用环境变量注入：REGISTRY_USER / REGISTRY_TOKEN
+docker login -u "$REGISTRY_USER" -p "$REGISTRY_TOKEN" serverless-100015709299-docker.pkg.coding.net
 
 # 从 Docker 仓库拉取最新的云库应用镜像 需要替换
 docker pull serverless-100015709299-docker.pkg.coding.net/yunshangtushuguan/myapp/cloudlibrary:latest
@@ -19,4 +20,4 @@ docker pull serverless-100015709299-docker.pkg.coding.net/yunshangtushuguan/myap
 docker tag serverless-100015709299-docker.pkg.coding.net/yunshangtushuguan/myapp/cloudlibrary:latest cloudlibrary:latest
 
 # 以后台模式启动 Docker Compose 服务
-docker-compose up -d
+docker compose up -d

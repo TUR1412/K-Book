@@ -1,7 +1,7 @@
 package com.itheima.interceptor;
 
 import com.itheima.domain.User;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -10,14 +10,15 @@ import java.util.List;
 /**
  * 资源拦截器
  */
-public class ResourcesInterceptor extends HandlerInterceptorAdapter {
+public class ResourcesInterceptor implements HandlerInterceptor {
     //任意角色都能访问的路径
     private List<String> ignoreUrl;
     public ResourcesInterceptor(List<String> ignoreUrl) {
         this.ignoreUrl = ignoreUrl;
     }
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws
-            Exception {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         User user = (User) request.getSession().getAttribute("USER_SESSION");
         //获取请求的路径
         String uri = request.getRequestURI();

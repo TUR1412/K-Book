@@ -57,4 +57,20 @@ public class Result<T> implements Serializable{
 		this.actionableSuggestion = suggestion;
 		return this;
 	}
+
+	public static <T> Result<T> ok(String message) {
+		return new Result<T>(true, message);
+	}
+
+	public static <T> Result<T> ok(String message, T data) {
+		return new Result<T>(true, message, data);
+	}
+
+	public static <T> Result<T> fail(String message) {
+		return new Result<T>(false, message);
+	}
+
+	public static <T> Result<T> fail(String message, String actionableSuggestion) {
+		return new Result<T>(false, message, actionableSuggestion);
+	}
 }
