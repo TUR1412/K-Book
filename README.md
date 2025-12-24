@@ -188,11 +188,12 @@ K-Book
 
 ## 工程自诊断（浏览器控制台）
 
-管理端内置零依赖诊断脚本，打开控制台即可使用：
+管理端内置零依赖诊断脚本，默认 **按需加载**（减少首屏 JS 成本），打开控制台即可使用：
 
-- 一次性快照：`kbHealth()`
-- 开启持续采样：`kbDiagnostics.start(2000)`
-- 停止采样：`kbDiagnostics.stop()`
+- 一次性快照：`kbHealth()`（会自动加载诊断脚本并输出快照）
+- 手动加载：`kbLoadDiagnostics().then(() => kbDiagnostics.start(2000))`
+- 停止采样：`kbDiagnostics.stop()`（需已加载诊断脚本）
+- URL 自动加载：访问管理端时加上 `?kbDiagnostics=1`
 
 ---
 

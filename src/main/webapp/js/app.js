@@ -416,6 +416,55 @@
     });
   }
 
+  var scrollBus;
+
+  function getScrollBus() {
+    if (scrollBus) {
+      return scrollBus;
+    }
+
+    var raf = window.requestAnimationFrame || function (fn) {
+      return window.setTimeout(fn, 16);
+    };
+    var scheduled = false;
+    var handlers = [];
+
+    var run = function () {
+      scheduled = false;
+      for (var i = 0; i < handlers.length; i++) {
+        handlers[i]();
+      }
+    };
+
+    var onScroll = function () {
+      if (scheduled) {
+        return;
+      }
+      scheduled = true;
+      raf(run);
+    };
+
+    try {
+      window.addEventListener('scroll', onScroll, { passive: true });
+    } catch (e) {
+      window.addEventListener('scroll', onScroll);
+    }
+
+    scrollBus = {
+      add: function (handler) {
+        if (typeof handler !== 'function') {
+          return;
+        }
+        handlers.push(handler);
+        onScroll();
+      },
+      refresh: onScroll
+    };
+
+    onScroll();
+    return scrollBus;
+  }
+
   function bindScrollTop() {
     var button = document.getElementById('scroll-top');
     if (!button) {
@@ -428,8 +477,8 @@
         button.classList.remove('show');
       }
     };
-    window.addEventListener('scroll', toggle, { passive: true });
     toggle();
+    getScrollBus().add(toggle);
     button.addEventListener('click', function () {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
@@ -447,8 +496,8 @@
         topbar.classList.remove('scrolled');
       }
     };
-    window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
+    getScrollBus().add(onScroll);
   }
 
   function bindSearchFocus() {

@@ -789,7 +789,7 @@ textarea:focus {
   vertical-align: middle;
 }
 
-.data-table tbody tr {
+.data-table tbody tr:nth-child(-n + 10) {
   animation: row-in 0.42s var(--ease-out) both;
 }
 
