@@ -112,7 +112,7 @@
 
 <jsp:include page="/admin/_scripts.jsp" />
 <script src="${pageContext.request.contextPath}/js/pagination.js?v=${appVersion}"></script>
-<script>
+<script nonce="${cspNonce}">
     pageargs.total = Math.ceil(${pageResult.total}/pageargs.pagesize);
     pageargs.cur = ${pageNum};
     pageargs.gourl = "${gourl}";

@@ -462,6 +462,15 @@ img {
   opacity: 0.75;
 }
 
+.logout-form {
+  margin: 0;
+  display: inline-flex;
+}
+
+.logout-form .btn {
+  white-space: nowrap;
+}
+
 .form-grid {
   display: grid;
   gap: 14px;

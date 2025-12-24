@@ -23,6 +23,7 @@
             <div class="login-alert" role="alert">${msg}</div>
         </c:if>
         <form id="loginform" class="login-form" action="${pageContext.request.contextPath}/login" method="post">
+            <input type="hidden" name="_csrf" value="${csrfToken}">
             <div class="form-field">
                 <label for="login-email">用户名</label>
                 <input id="login-email" type="text" placeholder="请输入账号或邮箱" class="input" name="email" autocomplete="username"
@@ -55,12 +56,13 @@
     </div>
 </div>
 </body>
-<script>
+<script nonce="${cspNonce}">
     window.__ctx = '${pageContext.request.contextPath}';
+    window.__csrf = '${csrfToken}';
 </script>
 <script src="${pageContext.request.contextPath}/js/kb-api.js?v=${appVersion}"></script>
 <script src="${pageContext.request.contextPath}/js/app.js?v=${appVersion}"></script>
-<script type="text/javascript">
+<script nonce="${cspNonce}" type="text/javascript">
     var _topWin = window;
     while (_topWin !== _topWin.parent.window) {
         _topWin = _topWin.parent.window;

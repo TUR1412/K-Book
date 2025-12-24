@@ -297,6 +297,10 @@
       },
       opts.headers || {}
     );
+    var csrfToken = window.__csrf;
+    if (csrfToken && !headers['X-CSRF-Token'] && !headers['x-csrf-token']) {
+      headers['X-CSRF-Token'] = csrfToken;
+    }
 
     /** @type {RequestInit} */
     var fetchOptions = {
@@ -371,7 +375,18 @@
             window.clearTimeout(timerId);
           }
           runResponseInterceptors(interceptorCtx, response);
+          var contentType = response.headers && response.headers.get ? response.headers.get('content-type') : '';
           if (!response.ok) {
+            if (expectJson && contentType && contentType.indexOf('application/json') !== -1) {
+              return response.json().then(function (payload) {
+                try {
+                  payload.__httpStatus = response.status;
+                } catch (e) {
+                  // ignore
+                }
+                return payload;
+              });
+            }
             var err = new Error('HTTP ' + response.status);
             err.status = response.status;
             throw err;
@@ -379,7 +394,6 @@
           if (!expectJson) {
             return response.text();
           }
-          var contentType = response.headers && response.headers.get ? response.headers.get('content-type') : '';
           if (contentType && contentType.indexOf('application/json') === -1) {
             return response.text().then(function () {
               throw new Error('INVALID_CONTENT_TYPE');
@@ -389,7 +403,7 @@
         })
         .then(function (payload) {
           updateRtt(Date.now() - started);
-          if (method === 'GET' && opts.cacheKey) {
+          if (method === 'GET' && opts.cacheKey && payload && payload.success === true) {
             writeCache(opts.cacheKey, payload);
           }
           return payload;
@@ -556,4 +570,3 @@
     postForm: postForm
   };
 })(window, document);
-

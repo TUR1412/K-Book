@@ -131,13 +131,13 @@
                             <div class="table-actions">
                                 <c:if test="${book.status ==1}">
                                     <button type="button" class="btn btn-sm btn-primary"
-                                            onclick="returnBook(${book.id}, this)">归还</button>
+                                            data-kb-action="return-book" data-book-id="${book.id}">归还</button>
                                 </c:if>
                                 <c:if test="${book.status ==2}">
                                     <button type="button" class="btn btn-sm btn-outline" disabled="true">归还中</button>
                                     <c:if test="${USER_SESSION.role =='ADMIN'}">
                                         <button type="button" class="btn btn-sm btn-ghost"
-                                                onclick="returnConfirm(${book.id}, this)">归还确认</button>
+                                                data-kb-action="return-confirm" data-book-id="${book.id}">归还确认</button>
                                     </c:if>
                                 </c:if>
                             </div>
@@ -159,7 +159,7 @@
 
 <jsp:include page="/admin/_scripts.jsp" />
 <script src="${pageContext.request.contextPath}/js/pagination.js?v=${appVersion}"></script>
-<script>
+<script nonce="${cspNonce}">
     pageargs.total = Math.ceil(${pageResult.total}/pageargs.pagesize);
     pageargs.cur = ${pageNum};
     pageargs.gourl = "${gourl}";

@@ -487,7 +487,65 @@ function bindBookFormEnhancements() {
 
 document.addEventListener("DOMContentLoaded", function () {
     bindBookFormEnhancements();
+    bindBorrowModalEnhancements();
+    bindDataActions();
 });
+
+function bindBorrowModalEnhancements() {
+    var dateInput = qs("#time");
+    if (dateInput) {
+        dateInput.addEventListener("change", function () {
+            validateReturnDate();
+        });
+        dateInput.addEventListener("blur", function () {
+            validateReturnDate();
+        });
+    }
+}
+
+function bindDataActions() {
+    document.addEventListener("click", function (event) {
+        var trigger = event.target && event.target.closest ? event.target.closest("[data-kb-action]") : null;
+        if (!trigger) {
+            return;
+        }
+        var action = trigger.getAttribute("data-kb-action") || "";
+        if (!action) {
+            return;
+        }
+        if (action === "new-book") {
+            resetBookForm();
+            return;
+        }
+        if (action === "borrow") {
+            var bid = trigger.getAttribute("data-book-id");
+            findBookById(bid, KB_BOOK_MODAL_MODE.BORROW);
+            return;
+        }
+        if (action === "edit") {
+            var eid = trigger.getAttribute("data-book-id");
+            findBookById(eid, KB_BOOK_MODAL_MODE.EDIT);
+            return;
+        }
+        if (action === "borrow-submit") {
+            borrow(trigger);
+            return;
+        }
+        if (action === "save-book") {
+            addOrEdit(trigger);
+            return;
+        }
+        if (action === "return-book") {
+            var rid = trigger.getAttribute("data-book-id");
+            returnBook(rid, trigger);
+            return;
+        }
+        if (action === "return-confirm") {
+            var cid = trigger.getAttribute("data-book-id");
+            returnConfirm(cid, trigger);
+        }
+    });
+}
 
 var pageargs = {
     cur: 1,
@@ -499,7 +557,10 @@ var pageargs = {
     callback: function (total) {
         var oPages = document.getElementsByClassName('page-index');
         for (var i = 0; i < oPages.length; i++) {
-            oPages[i].onclick = function () {
+            oPages[i].onclick = function (event) {
+                if (event && event.preventDefault) {
+                    event.preventDefault();
+                }
                 changePage(this.getAttribute('data-index'), pageargs.pagesize);
             };
         }
@@ -557,6 +618,9 @@ function changePage(pageNo, pageSize) {
     };
     addField('pageNum', pageargs.cur);
     addField('pageSize', pageargs.pagesize);
+    if (window.__csrf) {
+        addField('_csrf', window.__csrf);
+    }
     if (pageargs.gourl.indexOf("book") >= 0) {
         addField('name', bookVO.name);
         addField('author', bookVO.author);

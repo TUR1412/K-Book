@@ -86,11 +86,25 @@ sequenceDiagram
 
 ---
 
-## 5. 关键文件导航
+## 5. 协议与安全（零信任基线）
+
+在不引入复杂中间件/网关的前提下，项目在应用层补齐“可落地”的安全与带宽优化：
+
+- **CSRF 防护（应用内置）**：关键写接口强制校验 `_csrf` 或 `X-CSRF-Token`（Filter 实现）
+- **CSP（Nonce + 无内联事件）**：移除 JSP 内联事件处理与 `javascript:` 链接，启用更严格的脚本策略（Filter 下发）
+- **GZIP 压缩（应用内置）**：对 HTML/JSON/CSS/JS 响应进行 GZIP 压缩（Filter 实现），浏览器原生解压
+
+> 说明：为了兼容外部 Tomcat 部署，本项目选择“WAR 内自带 Filter”实现压缩与安全策略，而非依赖容器全局配置。
+
+---
+
+## 6. 关键文件导航
 
 - 前端网络层：`src/main/webapp/js/kb-api.js`
+- 前端诊断脚本：`src/main/webapp/js/kb-diagnostics.js`
+- 前端虚拟滚动：`src/main/webapp/js/kb-virtual-scroll.js`
 - 前端类型声明（IDE/TS server）：`src/main/webapp/js/kb-types.d.ts`
 - UI 交互与通用能力：`src/main/webapp/js/app.js`
 - 业务交互脚本：`src/main/webapp/js/my.js`
 - Controller：`src/main/java/com/itheima/controller/*`
-
+ - 安全/压缩 Filter：`src/main/java/com/itheima/config/EncodingFilter.java`、`src/main/java/com/itheima/config/CsrfFilter.java`、`src/main/java/com/itheima/config/CompressionFilter.java`

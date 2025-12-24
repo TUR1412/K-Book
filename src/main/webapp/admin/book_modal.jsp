@@ -31,15 +31,14 @@
                     </div>
                     <div class="form-field">
                         <label>归还日期</label>
-                        <input class="input" type="date" name="returnTime" id="time" onchange="validateReturnDate()" required>
+                        <input class="input" type="date" name="returnTime" id="time" required>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" onclick="borrow(this)"
-                        disabled="true" id="savemsg">确认借阅
+                <button class="btn btn-primary" type="button" disabled="true" id="savemsg" data-kb-action="borrow-submit">确认借阅
                 </button>
-                <button class="btn btn-ghost" data-dismiss="modal" aria-hidden="true">关闭</button>
+                <button class="btn btn-ghost" type="button" data-dismiss="modal" aria-hidden="true">关闭</button>
             </div>
         </div>
     </div>

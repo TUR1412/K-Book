@@ -16,7 +16,7 @@
             <span class="badge filter-count is-hidden" data-filter-count aria-live="polite">未筛选</span>
             <c:if test="${USER_SESSION.role =='ADMIN'}">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addOrEditModal"
-                        onclick="resetBookForm()">新增图书</button>
+                        data-kb-action="new-book">新增图书</button>
                 <span class="badge">快捷键 Alt + N</span>
             </c:if>
         </div>
@@ -95,7 +95,7 @@
             <c:if test="${USER_SESSION.role =='ADMIN'}">
                 <div class="empty-actions">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addOrEditModal"
-                            onclick="resetBookForm()">新增图书</button>
+                            data-kb-action="new-book">新增图书</button>
                 </div>
             </c:if>
         </c:when>
@@ -146,11 +146,11 @@
                             <div class="table-actions">
                                 <c:if test="${book.status ==0}">
                                     <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                            data-target="#borrowModal" onclick="findBookById(${book.id},'borrow')">借阅
+                                            data-target="#borrowModal" data-kb-action="borrow" data-book-id="${book.id}">借阅
                                     </button>
                                     <c:if test="${USER_SESSION.role =='ADMIN'}">
                                         <button type="button" class="btn btn-sm btn-outline" data-toggle="modal"
-                                                data-target="#addOrEditModal" onclick="findBookById(${book.id},'edit')">编辑
+                                                data-target="#addOrEditModal" data-kb-action="edit" data-book-id="${book.id}">编辑
                                         </button>
                                     </c:if>
                                 </c:if>
@@ -247,10 +247,9 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" data-dismiss="modal" aria-hidden="true" id="aoe" disabled
-                        onclick="addOrEdit(this)">保存
+                <button class="btn btn-primary" type="button" id="aoe" disabled data-kb-action="save-book">保存
                 </button>
-                <button class="btn btn-ghost" data-dismiss="modal" aria-hidden="true">关闭</button>
+                <button class="btn btn-ghost" type="button" data-dismiss="modal" aria-hidden="true">关闭</button>
             </div>
         </div>
     </div>
@@ -258,7 +257,7 @@
 
 <jsp:include page="/admin/_scripts.jsp" />
 <script src="${pageContext.request.contextPath}/js/pagination.js?v=${appVersion}"></script>
-<script>
+<script nonce="${cspNonce}">
     pageargs.total = Math.ceil(${pageResult.total}/pageargs.pagesize);
     pageargs.cur = ${pageNum};
     pageargs.gourl = "${gourl}";

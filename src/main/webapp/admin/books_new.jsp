@@ -70,7 +70,7 @@
                         <td data-export="false">
                             <c:if test="${book.status ==0}">
                                 <button type="button" class="btn btn-sm btn-primary" data-toggle="modal"
-                                        data-target="#borrowModal" onclick="findBookById(${book.id},'borrow')">借阅
+                                        data-target="#borrowModal" data-kb-action="borrow" data-book-id="${book.id}">借阅
                                 </button>
                             </c:if>
                             <c:if test="${book.status ==1 ||book.status ==2}">

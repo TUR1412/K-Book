@@ -26,10 +26,13 @@
 ### 安全默认
 - 登录口令采用 PBKDF2-SHA256 + 随机盐（支持旧明文口令自动升级）
 - 基础安全响应头默认启用（防止常见点击劫持/嗅探等风险）
+- CSRF 防护：关键写接口强制校验 `_csrf` / `X-CSRF-Token`（前端自动注入）
+- CSP 强化：移除内联事件处理与 `javascript:` 链接，启用 Nonce 脚本策略
 - 仓库中不再保存明文 Token / 密钥（部署脚本已改为环境变量注入）
 
 ### 依赖与性能
 - 前端运行时：纯原生 JS + 自研 Modal（移除 jQuery / Bootstrap 运行时依赖）
+- 协议压缩：WAR 内置 GZIP Filter，压缩 HTML/JSON/CSS/JS，弱网更友好
 - Maven Wrapper：无需本机安装 Maven 即可构建
 - 依赖升级：Spring / MyBatis / Jackson 等升级到安全版本，替换 Log4j 为 Logback
 
@@ -180,6 +183,16 @@ K-Book
 - 建议阅读顺序：`docs/index.md` → `docs/ARCHITECTURE.md` → `docs/DEPLOYMENT.md` → `docs/API.md`
 
 > 说明：Mermaid 图在 GitHub 会自动渲染；若在本地阅读，建议用支持 Mermaid 的 Markdown 查看器。
+
+---
+
+## 工程自诊断（浏览器控制台）
+
+管理端内置零依赖诊断脚本，打开控制台即可使用：
+
+- 一次性快照：`kbHealth()`
+- 开启持续采样：`kbDiagnostics.start(2000)`
+- 停止采样：`kbDiagnostics.stop()`
 
 ---
 

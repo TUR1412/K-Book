@@ -36,13 +36,13 @@
         // 最后一页   1、总数不超过5条（上一页），2、超过5条（上一页，左more）
         var html = '<ul class="pages"><li class="page">';
         if (total === 1) {
-            html += '<a href="javascript:void(0);" class="page-index cur" aria-current="page" data-index="1">' + 1 + '</a>'
+            html += '<a href="#" class="page-index cur" aria-current="page" data-index="1">' + 1 + '</a>'
         }
         if (cur !== 1 && total !== 1) {
             // 首页
-            html += '<a href="javascript:void(0);" class="page-index first" data-index="1" aria-label="首页">&laquo;</a>'
+            html += '<a href="#" class="page-index first" data-index="1" aria-label="首页">&laquo;</a>'
             // 上一页
-            html += '<a href="javascript:void(0);" class="prev page-index" data-index="' + (cur - 1) + '" aria-label="上一页">&lt;</a>'
+            html += '<a href="#" class="prev page-index" data-index="' + (cur - 1) + '" aria-label="上一页">&lt;</a>'
         }
         if (total > len && cur > Math.ceil(len / 2) && total !== 1) {
             // 左more
@@ -56,26 +56,26 @@
             if (len < total && cur > Math.floor(len / 2) && (cur <= total - Math.floor(len / 2))) {
                 for (var j = 1; j <= len; j++) {
                     if (cur === (cur - Math.ceil(len / 2) + j)) {
-                        html += '<a href="javascript:void(0);" class="page-index cur" aria-current="page" data-index="' + (cur - Math.ceil(len / 2) + j) + '">' + (cur - Math.ceil(len / 2) + j) + '</a>';
+                        html += '<a href="#" class="page-index cur" aria-current="page" data-index="' + (cur - Math.ceil(len / 2) + j) + '">' + (cur - Math.ceil(len / 2) + j) + '</a>';
                         continue;
                     }
-                    html += '<a href="javascript:void(0);" class="page-index" data-index="' + (cur - Math.ceil(len / 2) + j) + '">' + (cur - Math.ceil(len / 2) + j) + '</a>';
+                    html += '<a href="#" class="page-index" data-index="' + (cur - Math.ceil(len / 2) + j) + '">' + (cur - Math.ceil(len / 2) + j) + '</a>';
                 }
             } else if (cur < len) {
                 for (var i = 1; i <= _l; i++) {
                     if (cur === i) {
-                        html += '<a href="javascript:void(0);" class="cur page-index" aria-current="page" data-index="' + i + '">' + i + '</a>'
+                        html += '<a href="#" class="cur page-index" aria-current="page" data-index="' + i + '">' + i + '</a>'
                         continue;
                     }
-                    html += '<a href="javascript:void(0);" class="page-index" data-index="' + i + '">' + i + '</a>'
+                    html += '<a href="#" class="page-index" data-index="' + i + '">' + i + '</a>'
                 }
             } else {
                 for (var i = len - 1; i >= 0; i--) {
                     if (cur === (total - i)) {
-                        html += '<a href="javascript:void(0);" class="cur page-index" aria-current="page" data-index="' + (total - i) + '">' + (total - i) + '</a>'
+                        html += '<a href="#" class="cur page-index" aria-current="page" data-index="' + (total - i) + '">' + (total - i) + '</a>'
                         continue;
                     }
-                    html += '<a href="javascript:void(0);" class="page-index" data-index="' + (total - i) + '">' + (total - i) + '</a>'
+                    html += '<a href="#" class="page-index" data-index="' + (total - i) + '">' + (total - i) + '</a>'
                 }
             }
         }
@@ -87,9 +87,9 @@
 
         if (cur !== total && total !== 1) {
             // 下一页
-            html += '<a href="javascript:void(0);" class="page-index next" data-index="' + (cur + 1) + '" aria-label="下一页">&gt;</a>';
+            html += '<a href="#" class="page-index next" data-index="' + (cur + 1) + '" aria-label="下一页">&gt;</a>';
             // 末页
-            html += '<a href="javascript:void(0);" class="page-index last" data-index="' + total + '" aria-label="末页">&raquo;</a>';
+            html += '<a href="#" class="page-index last" data-index="' + total + '" aria-label="末页">&raquo;</a>';
         }
         html += '<span class="page-total">共<span class="number">' + total + '</span>页</span>\
           <span class="page-go">到第<input class="w35 go" id="yeshu" type="number" min="1" inputmode="numeric" aria-label="页码" value="">页</span>\

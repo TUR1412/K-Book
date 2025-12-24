@@ -67,6 +67,27 @@ declare namespace Kb {
 declare interface Window {
   kbApi?: Kb.Api;
   kbToast?: (message: string, type?: Kb.ToastType) => void;
+  kbVirtualList?: <T>(
+    host: HTMLElement,
+    options: {
+      items: T[];
+      itemHeight: number;
+      renderItem: (el: HTMLElement, item: T, index: number) => void;
+      overscan?: number;
+      className?: string;
+    }
+  ) => {
+    setItems: (items: T[]) => void;
+    profile: () => Promise<{ items: number; itemHeight: number; pool: number; fps: number }>;
+    destroy: () => void;
+  };
+  kbDiagnostics?: {
+    snapshot: () => any;
+    print: () => any;
+    start: (intervalMs?: number) => void;
+    stop: () => void;
+  };
+  kbHealth?: () => any;
   __ctx?: string;
+  __csrf?: string;
 }
-

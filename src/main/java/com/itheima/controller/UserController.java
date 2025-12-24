@@ -40,8 +40,14 @@ public class UserController {
                 否：Request域中添加提示信息，并转发到登录页面
              */
             if(u!=null){
-                request.getSession().setAttribute("USER_SESSION",u);
-                 return "redirect:/admin/main.jsp";
+                // 防止 Session Fixation：登录成功后刷新 Session
+                HttpSession existing = request.getSession(false);
+                if (existing != null) {
+                    existing.invalidate();
+                }
+                HttpSession session = request.getSession(true);
+                session.setAttribute("USER_SESSION",u);
+                return "redirect:/admin/main.jsp";
             }
             request.setAttribute("msg","用户名或密码错误");
             return  "forward:/admin/login.jsp";

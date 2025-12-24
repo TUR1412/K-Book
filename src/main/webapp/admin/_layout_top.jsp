@@ -105,7 +105,10 @@
                         </c:otherwise>
                     </c:choose>
                 </div>
-                <a class="btn btn-ghost" href="${ctx}/logout">退出</a>
+                <form class="logout-form" action="${ctx}/logout" method="post" data-no-loading="true">
+                    <input type="hidden" name="_csrf" value="${csrfToken}">
+                    <button class="btn btn-ghost" type="submit">退出</button>
+                </form>
             </div>
         </header>
         <section class="app-content">
