@@ -31,7 +31,7 @@
                     </div>
                     <div class="form-field">
                         <label>归还日期</label>
-                        <input class="input" type="date" name="returnTime" id="time" onchange="cg()" required>
+                        <input class="input" type="date" name="returnTime" id="time" onchange="validateReturnDate()" required>
                     </div>
                 </form>
             </div>

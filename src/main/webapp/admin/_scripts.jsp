@@ -3,5 +3,6 @@
 <script>
     window.__ctx = '${pageContext.request.contextPath}';
 </script>
+<script src="${ctx}/js/kb-api.js?v=${appVersion}"></script>
 <script src="${ctx}/js/app.js?v=${appVersion}"></script>
 <script src="${ctx}/js/my.js?v=${appVersion}"></script>

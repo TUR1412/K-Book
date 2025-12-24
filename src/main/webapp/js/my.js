@@ -1,3 +1,28 @@
+// @ts-check
+/// <reference path="./kb-types.d.ts" />
+
+var KB_REDIRECT_DELAY_MS = 700;
+var KB_NETWORK_ERROR_MESSAGE = "网络繁忙，请稍后再试。";
+var KB_FORM_PROCESSING_TEXT = "处理中...";
+var KB_BORROW_DEFAULT_DAYS = 7;
+
+var KB_BOOK_ENDPOINTS = Object.freeze({
+    BORROW: "/book/borrowBook",
+    SEARCH: "/book/search",
+    SEARCH_BORROWED: "/book/searchBorrowed",
+    FIND_BY_ID: "/book/findById",
+    ADD: "/book/addBook",
+    EDIT: "/book/editBook",
+    RETURN: "/book/returnBook",
+    RETURN_CONFIRM: "/book/returnConfirm"
+});
+
+var KB_BOOK_MODAL_MODE = Object.freeze({
+    EDIT: "edit",
+    BORROW: "borrow"
+});
+
+/** @param {string} message @param {Kb.ToastType=} type */
 function notify(message, type) {
     if (window.kbToast) {
         window.kbToast(message, type);
@@ -6,6 +31,7 @@ function notify(message, type) {
     alert(message);
 }
 
+/** @param {Kb.ApiResponse<any>=} response @param {string=} fallback */
 function buildMessage(response, fallback) {
     var message = (response && response.message) || fallback || "";
     if (response && response.actionableSuggestion) {
@@ -30,7 +56,7 @@ function setButtonLoading(button, isLoading, text) {
         if (!button.dataset.originText) {
             button.dataset.originText = button.textContent || "";
         }
-        button.textContent = text || "处理中...";
+        button.textContent = text || KB_FORM_PROCESSING_TEXT;
         button.disabled = true;
         button.classList.add("is-loading");
         button.setAttribute("aria-busy", "true");
@@ -86,6 +112,13 @@ function serializeForm(form) {
 }
 
 function requestJson(url, options) {
+    if (window.kbApi && typeof window.kbApi.request === "function") {
+        return window.kbApi.request(url, options || {});
+    }
+    var finalUrl = url;
+    if (finalUrl && finalUrl.charAt && finalUrl.charAt(0) === "/" && finalUrl.indexOf(getProjectPath() + "/") !== 0) {
+        finalUrl = getProjectPath() + finalUrl;
+    }
     var fetchOptions = options || {};
     fetchOptions.headers = Object.assign(
         {
@@ -93,7 +126,7 @@ function requestJson(url, options) {
         },
         fetchOptions.headers || {}
     );
-    return fetch(url, fetchOptions).then(function (res) {
+    return fetch(finalUrl, fetchOptions).then(function (res) {
         if (!res.ok) {
             throw new Error("HTTP " + res.status);
         }
@@ -106,6 +139,9 @@ function getJson(url) {
 }
 
 function postForm(url, form) {
+    if (window.kbApi && typeof window.kbApi.postForm === "function") {
+        return window.kbApi.postForm(url, form, { credentials: "same-origin" });
+    }
     var body = serializeForm(form).toString();
     return requestJson(url, {
         method: "POST",
@@ -117,7 +153,7 @@ function postForm(url, form) {
     });
 }
 
-function cg() {
+function validateReturnDate() {
     var dateInput = qs("#time");
     var saveButton = qs("#savemsg");
     if (!dateInput || !saveButton) {
@@ -140,7 +176,7 @@ function cg() {
 }
 
 function borrow(button) {
-    var url = getProjectPath() + "/book/borrowBook";
+    var url = KB_BOOK_ENDPOINTS.BORROW;
     var form = qs("#borrowBook");
     if (!form) {
         notify("借阅表单未找到。", "error");
@@ -152,8 +188,8 @@ function borrow(button) {
             if (response && response.success === true) {
                 notify(buildMessage(response, "借阅成功，请到行政中心取书。"), "success");
                 setTimeout(function () {
-                    window.location.href = getProjectPath() + "/book/search";
-                }, 700);
+                    window.location.href = getProjectPath() + KB_BOOK_ENDPOINTS.SEARCH;
+                }, KB_REDIRECT_DELAY_MS);
                 return;
             }
             setButtonLoading(button, false);
@@ -161,11 +197,11 @@ function borrow(button) {
         })
         .catch(function () {
             setButtonLoading(button, false);
-            notify("网络繁忙，请稍后再试。", "error");
+            notify(KB_NETWORK_ERROR_MESSAGE, "error");
         });
 }
 
-function resetFrom() {
+function resetBookForm() {
     var save = qs("#aoe");
     if (save) {
         save.disabled = true;
@@ -195,7 +231,8 @@ function findBookById(id, doname) {
         notify("图书ID无效。", "error");
         return;
     }
-    var url = getProjectPath() + "/book/findById?id=" + encodeURIComponent(safeId);
+    var mode = String(doname || "");
+    var url = KB_BOOK_ENDPOINTS.FIND_BY_ID + "?id=" + encodeURIComponent(safeId);
     getJson(url)
         .then(function (response) {
             if (!response || response.success !== true) {
@@ -206,7 +243,7 @@ function findBookById(id, doname) {
                 notify(buildMessage(response, "未找到对应图书。"), "error");
                 return;
             }
-            if (doname === "edit") {
+            if (mode === KB_BOOK_MODAL_MODE.EDIT) {
                 var map = {
                     ebid: response.data.id,
                     ebname: response.data.name,
@@ -225,7 +262,7 @@ function findBookById(id, doname) {
                 });
                 return;
             }
-            if (doname === "borrow") {
+            if (mode === KB_BOOK_MODAL_MODE.BORROW) {
                 var saveButton = qs("#savemsg");
                 if (saveButton) {
                     saveButton.disabled = true;
@@ -238,12 +275,12 @@ function findBookById(id, doname) {
                     var day = String(today.getDate()).padStart(2, "0");
                     time.min = today.getFullYear() + "-" + month + "-" + day;
                     var target = new Date();
-                    target.setDate(target.getDate() + 7);
+                    target.setDate(target.getDate() + KB_BORROW_DEFAULT_DAYS);
                     var tMonth = String(target.getMonth() + 1).padStart(2, "0");
                     var tDay = String(target.getDate()).padStart(2, "0");
                     time.value = target.getFullYear() + "-" + tMonth + "-" + tDay;
                 }
-                cg();
+                validateReturnDate();
                 var borrowMap = {
                     bid: response.data.id,
                     bname: response.data.name,
@@ -261,7 +298,7 @@ function findBookById(id, doname) {
             }
         })
         .catch(function () {
-            notify("网络繁忙，请稍后再试。", "error");
+            notify(KB_NETWORK_ERROR_MESSAGE, "error");
         });
 }
 
@@ -274,15 +311,15 @@ function addOrEdit(button) {
     }
     var ebid = idInput && idInput.value ? parseInt(idInput.value, 10) : 0;
     if (ebid > 0) {
-        var url = getProjectPath() + "/book/editBook";
+        var url = KB_BOOK_ENDPOINTS.EDIT;
         setButtonLoading(button, true, "保存中...");
         postForm(url, form)
             .then(function (response) {
                 if (response && response.success === true) {
                     notify(buildMessage(response, "编辑成功！"), "success");
                     setTimeout(function () {
-                        window.location.href = getProjectPath() + "/book/search";
-                    }, 700);
+                        window.location.href = getProjectPath() + KB_BOOK_ENDPOINTS.SEARCH;
+                    }, KB_REDIRECT_DELAY_MS);
                     return;
                 }
                 setButtonLoading(button, false);
@@ -290,19 +327,19 @@ function addOrEdit(button) {
             })
             .catch(function () {
                 setButtonLoading(button, false);
-                notify("网络繁忙，请稍后再试。", "error");
+                notify(KB_NETWORK_ERROR_MESSAGE, "error");
             });
         return;
     }
-    var createUrl = getProjectPath() + "/book/addBook";
+    var createUrl = KB_BOOK_ENDPOINTS.ADD;
     setButtonLoading(button, true, "保存中...");
     postForm(createUrl, form)
         .then(function (response) {
             if (response && response.success === true) {
                 notify(buildMessage(response, "新增图书成功！"), "success");
                 setTimeout(function () {
-                    window.location.href = getProjectPath() + "/book/search";
-                }, 700);
+                    window.location.href = getProjectPath() + KB_BOOK_ENDPOINTS.SEARCH;
+                }, KB_REDIRECT_DELAY_MS);
                 return;
             }
             setButtonLoading(button, false);
@@ -310,7 +347,7 @@ function addOrEdit(button) {
         })
         .catch(function () {
             setButtonLoading(button, false);
-            notify("网络繁忙，请稍后再试。", "error");
+            notify(KB_NETWORK_ERROR_MESSAGE, "error");
         });
 }
 
@@ -325,15 +362,15 @@ function returnBook(bid, button) {
         notify("图书ID无效。", "error");
         return;
     }
-    var url = getProjectPath() + "/book/returnBook?id=" + encodeURIComponent(safeId);
+    var url = KB_BOOK_ENDPOINTS.RETURN + "?id=" + encodeURIComponent(safeId);
     setButtonLoading(button, true, "提交中...");
     getJson(url)
         .then(function (response) {
             if (response && response.success === true) {
                 notify(buildMessage(response, "归还申请已提交。"), "success");
                 setTimeout(function () {
-                    window.location.href = getProjectPath() + "/book/searchBorrowed";
-                }, 700);
+                    window.location.href = getProjectPath() + KB_BOOK_ENDPOINTS.SEARCH_BORROWED;
+                }, KB_REDIRECT_DELAY_MS);
                 return;
             }
             setButtonLoading(button, false);
@@ -341,7 +378,7 @@ function returnBook(bid, button) {
         })
         .catch(function () {
             setButtonLoading(button, false);
-            notify("网络繁忙，请稍后再试。", "error");
+            notify(KB_NETWORK_ERROR_MESSAGE, "error");
         });
 }
 
@@ -356,15 +393,15 @@ function returnConfirm(bid, button) {
         notify("图书ID无效。", "error");
         return;
     }
-    var url = getProjectPath() + "/book/returnConfirm?id=" + encodeURIComponent(safeId);
+    var url = KB_BOOK_ENDPOINTS.RETURN_CONFIRM + "?id=" + encodeURIComponent(safeId);
     setButtonLoading(button, true, "确认中...");
     getJson(url)
         .then(function (response) {
             if (response && response.success === true) {
                 notify(buildMessage(response, "确认成功！"), "success");
                 setTimeout(function () {
-                    window.location.href = getProjectPath() + "/book/searchBorrowed";
-                }, 700);
+                    window.location.href = getProjectPath() + KB_BOOK_ENDPOINTS.SEARCH_BORROWED;
+                }, KB_REDIRECT_DELAY_MS);
                 return;
             }
             setButtonLoading(button, false);
@@ -372,11 +409,11 @@ function returnConfirm(bid, button) {
         })
         .catch(function () {
             setButtonLoading(button, false);
-            notify("网络繁忙，请稍后再试。", "error");
+            notify(KB_NETWORK_ERROR_MESSAGE, "error");
         });
 }
 
-function checkval() {
+function updateBookSaveState() {
     var inputs = qsa("#addOrEditBook input");
     var invalid = false;
     inputs.forEach(function (input) {
@@ -437,7 +474,7 @@ function bindBookFormEnhancements() {
                 }
             }
             clearInvalid(input);
-            checkval();
+            updateBookSaveState();
         });
         input.addEventListener("focus", function () {
             clearInvalid(input);

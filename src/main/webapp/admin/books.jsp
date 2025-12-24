@@ -16,7 +16,7 @@
             <span class="badge filter-count is-hidden" data-filter-count aria-live="polite">未筛选</span>
             <c:if test="${USER_SESSION.role =='ADMIN'}">
                 <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addOrEditModal"
-                        onclick="resetFrom()">新增图书</button>
+                        onclick="resetBookForm()">新增图书</button>
                 <span class="badge">快捷键 Alt + N</span>
             </c:if>
         </div>
@@ -95,7 +95,7 @@
             <c:if test="${USER_SESSION.role =='ADMIN'}">
                 <div class="empty-actions">
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addOrEditModal"
-                            onclick="resetFrom()">新增图书</button>
+                            onclick="resetBookForm()">新增图书</button>
                 </div>
             </c:if>
         </c:when>

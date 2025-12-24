@@ -1,3 +1,6 @@
+// @ts-check
+/// <reference path="./kb-types.d.ts" />
+
 (function () {
   function ready(fn) {
     if (document.readyState !== 'loading') {
@@ -266,8 +269,8 @@
         return;
       }
       event.preventDefault();
-      if (typeof window.resetFrom === 'function') {
-        window.resetFrom();
+      if (typeof window.resetBookForm === 'function') {
+        window.resetBookForm();
       }
       openModal(modal);
     });
@@ -475,6 +478,19 @@
     };
     var requestSummary = function () {
       setRefreshing(true);
+      var api = window.kbApi;
+      if (api && typeof api.get === 'function') {
+        api
+          .get('/book/summary', { credentials: 'same-origin', retries: 1 })
+          .then(onSuccess)
+          .catch(function () {
+            if (window.kbToast) {
+              window.kbToast('获取摘要失败，请稍后重试。', 'error');
+            }
+            setRefreshing(false);
+          });
+        return;
+      }
       if (window.fetch) {
         fetch(ctx + '/book/summary', { credentials: 'same-origin' })
           .then(function (res) { return res.json(); })

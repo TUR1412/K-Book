@@ -55,6 +55,10 @@
     </div>
 </div>
 </body>
+<script>
+    window.__ctx = '${pageContext.request.contextPath}';
+</script>
+<script src="${pageContext.request.contextPath}/js/kb-api.js?v=${appVersion}"></script>
 <script src="${pageContext.request.contextPath}/js/app.js?v=${appVersion}"></script>
 <script type="text/javascript">
     var _topWin = window;

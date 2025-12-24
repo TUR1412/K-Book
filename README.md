@@ -49,15 +49,58 @@
 ## 架构概览
 
 ```mermaid
-flowchart LR
-  Browser[浏览器] -->|HTTP| MVC[Spring MVC Controller]
-  MVC --> Service[Service + Transaction]
-  Service --> Mapper[MyBatis Mapper]
-  Mapper --> DB[(MySQL)]
-  MVC -->|JSP Render| View[JSP + Static Assets]
+flowchart TB
+  subgraph Client[客户端 / Browser]
+    View[JSP 页面 + 静态资源]
+    Net[kbApi：拦截/超时/重试/进度条/状态事件]
+    View --> Net
+  end
+
+  subgraph Server[服务端 / Tomcat + Spring MVC]
+    Filter[Filter: 编码 & 安全响应头]
+    Ctrl[Controller]
+    Svc[Service + Transaction]
+    Mapper[MyBatis Mapper]
+    Filter --> Ctrl --> Svc --> Mapper
+  end
+
+  subgraph Data[数据层]
+    DB[(MySQL)]
+  end
+
+  Net -->|HTTP JSON / Form| Ctrl
+  Mapper --> DB
 ```
 
-关键链路：Controller → Service（事务）→ Mapper（SQL）→ JSP 渲染。
+关键链路：JSP/原生 JS → `kbApi`（请求闭环）→ Controller → Service（事务）→ Mapper（SQL）→ DB。  
+更完整的分层与时序图见：`docs/index.md`、`docs/ARCHITECTURE.md`。
+
+<details>
+<summary><strong>借阅链路（时序图）</strong></summary>
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant P as Page(JS)
+  participant C as Controller
+  participant S as Service
+  participant M as Mapper
+  participant DB as MySQL
+
+  U->>P: 点击“借阅”
+  P->>P: kbApi 进入请求闭环（loading/超时/重试）
+  P->>C: POST /book/borrowBook
+  C->>S: borrowBook(...)
+  S->>M: SQL
+  M->>DB: UPDATE/INSERT
+  DB-->>M: OK
+  M-->>S: rows
+  S-->>C: Result
+  C-->>P: JSON(Result)
+  P-->>U: Toast + 跳转
+```
+
+</details>
 
 ---
 
@@ -129,7 +172,19 @@ K-Book
 
 ---
 
+## 交互式文档入口
+
+本项目文档支持 **可折叠导航（`<details>`）+ Mermaid 架构图**，推荐从入口页开始：
+
+- 入口：`docs/index.md`
+- 建议阅读顺序：`docs/index.md` → `docs/ARCHITECTURE.md` → `docs/DEPLOYMENT.md` → `docs/API.md`
+
+> 说明：Mermaid 图在 GitHub 会自动渲染；若在本地阅读，建议用支持 Mermaid 的 Markdown 查看器。
+
+---
+
 ## 文档索引
+- `docs/index.md`：交互式文档入口（可折叠导航 + Mermaid 图）
 - `docs/STYLE_GUIDE.md`：UI 样式指南
 - `docs/DEPLOYMENT.md`：部署指南
 - `docs/ARCHITECTURE.md`：架构概览
