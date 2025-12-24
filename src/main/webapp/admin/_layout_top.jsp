@@ -52,16 +52,19 @@
     </aside>
     <main class="app-main" id="main-content">
         <header class="app-topbar">
-            <div>
+            <div class="topbar-meta">
                 <h1 class="page-title">${param.pageTitle}</h1>
-                <p class="page-hint">${param.pageHint}</p>
+                <p class="page-hint text-fade">${param.pageHint}</p>
             </div>
-            <div style="display:flex; gap:12px; align-items:center;">
+            <div class="topbar-actions">
                 <button class="btn btn-outline btn-sm" type="button" id="density-toggle" aria-pressed="false" title="切换紧凑布局">
                     紧凑模式
                 </button>
                 <button class="btn btn-outline btn-sm" type="button" id="contrast-toggle" aria-pressed="false" title="切换高对比模式">
                     高对比
+                </button>
+                <button class="btn btn-outline btn-sm" type="button" id="theme-toggle" aria-pressed="false" title="切换主题（自动/暗黑/亮色）">
+                    主题：自动
                 </button>
                 <button class="btn btn-outline btn-sm" type="button" id="help-toggle" aria-expanded="false" aria-controls="shortcut-panel" title="查看快捷键">
                     快捷键

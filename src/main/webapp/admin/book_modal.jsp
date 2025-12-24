@@ -1,10 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<div class="modal fade" id="borrowModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+<div class="modal fade" id="borrowModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="borrowModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="myModalLabel">借阅信息</h3>
+                <h3 id="borrowModalLabel">借阅信息</h3>
             </div>
             <div class="modal-body">
                 <form id="borrowBook" class="form-grid grid-2">
@@ -38,7 +38,7 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" type="button" disabled="true" id="savemsg" data-kb-action="borrow-submit">确认借阅
                 </button>
-                <button class="btn btn-ghost" type="button" data-dismiss="modal" aria-hidden="true">关闭</button>
+                <button class="btn btn-ghost" type="button" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>

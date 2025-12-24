@@ -4,7 +4,7 @@
   align-items: center;
   gap: 12px;
   margin-top: 16px;
-  color: #425466;
+  color: var(--muted);
 }
 
 .pagination .pages {
@@ -16,19 +16,19 @@
 .pagination .page a {
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  color: #1f2937;
+  border: 1px solid var(--border);
+  color: var(--text);
   font-size: 0.85rem;
   transition: all 0.2s ease;
 }
 
 .pagination .page a:hover {
   background: rgba(37, 99, 235, 0.08);
-  color: #2563eb;
+  color: var(--primary);
 }
 
 .pagination .page a.cur {
-  background: #2563eb;
+  background: var(--primary);
   color: #fff;
   border-color: rgba(37, 99, 235, 0.6);
 }
@@ -42,12 +42,12 @@
 .pagination .next {
   padding: 6px 10px;
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  color: #2563eb;
+  border: 1px solid var(--border);
+  color: var(--primary);
 }
 
 .pagination .more {
-  color: rgba(15, 23, 42, 0.6);
+  color: var(--muted);
 }
 
 .pagination .page-total {
@@ -65,7 +65,10 @@
   width: 46px;
   padding: 6px 8px;
   border-radius: 8px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--border);
+  background: var(--surface-opaque);
+  color: var(--text);
+  font-family: inherit;
 }
 
 .pagination .page-go .go:focus-visible {
@@ -76,9 +79,9 @@
 .pagination .gray-btn {
   padding: 6px 12px;
   border-radius: 10px;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--border);
   background: rgba(15, 23, 42, 0.06);
-  color: #1f2937;
+  color: var(--text);
   cursor: pointer;
   transition: all 0.2s ease;
 }

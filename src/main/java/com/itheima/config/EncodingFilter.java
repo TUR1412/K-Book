@@ -77,7 +77,7 @@ public class EncodingFilter  implements Filter {
                 + "frame-ancestors 'self'; "
                 + "object-src 'none'; "
                 + "script-src 'self' 'nonce-" + safeNonce + "'; "
-                + "style-src 'self'; "
+                + "style-src 'self' 'unsafe-inline'; "
                 + "img-src 'self' data:; "
                 + "font-src 'self' data:; "
                 + "connect-src 'self'";

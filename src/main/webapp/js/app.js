@@ -259,6 +259,98 @@
     });
   }
 
+  var themeMedia = null;
+  var themeMediaBound = false;
+
+  function getThemePreference() {
+    if (!storage) {
+      return 'auto';
+    }
+    var raw = storage.getItem('kb:theme');
+    if (raw === 'dark' || raw === 'light' || raw === 'auto') {
+      return raw;
+    }
+    return 'auto';
+  }
+
+  function setThemePreference(mode) {
+    if (!storage) {
+      return;
+    }
+    storage.setItem('kb:theme', mode);
+  }
+
+  function computeThemeMode(mode) {
+    var pref = mode || getThemePreference();
+    var prefersDark = false;
+    if (window.matchMedia) {
+      prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    if (pref === 'dark') {
+      return { pref: 'dark', isDark: true, label: '暗黑' };
+    }
+    if (pref === 'light') {
+      return { pref: 'light', isDark: false, label: '亮色' };
+    }
+    return { pref: 'auto', isDark: prefersDark, label: '自动' };
+  }
+
+  function withThemeTransition(apply) {
+    document.body.classList.add('theme-animating');
+    try {
+      apply();
+    } finally {
+      setTimeout(function () {
+        document.body.classList.remove('theme-animating');
+      }, 360);
+    }
+  }
+
+  function applyThemeSetting() {
+    var computed = computeThemeMode();
+    document.body.classList.toggle('theme-dark', computed.isDark);
+    if (document.documentElement && document.documentElement.style) {
+      document.documentElement.style.colorScheme = computed.isDark ? 'dark' : 'light';
+    }
+    var toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+      toggle.textContent = '主题：' + computed.label;
+      toggle.setAttribute('aria-pressed', computed.isDark ? 'true' : 'false');
+    }
+  }
+
+  function bindThemeToggle() {
+    var toggle = document.getElementById('theme-toggle');
+    if (!toggle) {
+      return;
+    }
+    toggle.addEventListener('click', function () {
+      var current = getThemePreference();
+      var next = current === 'auto' ? 'dark' : current === 'dark' ? 'light' : 'auto';
+      setThemePreference(next);
+      withThemeTransition(applyThemeSetting);
+      var label = computeThemeMode(next).label;
+      if (window.kbToast) {
+        window.kbToast('已切换主题：' + label, 'info');
+      }
+    });
+    if (!themeMediaBound && window.matchMedia) {
+      themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      var onChange = function () {
+        if (getThemePreference() !== 'auto') {
+          return;
+        }
+        withThemeTransition(applyThemeSetting);
+      };
+      if (themeMedia.addEventListener) {
+        themeMedia.addEventListener('change', onChange);
+      } else if (themeMedia.addListener) {
+        themeMedia.addListener(onChange);
+      }
+      themeMediaBound = true;
+    }
+  }
+
   function bindQuickActions() {
     document.addEventListener('keydown', function (event) {
       if (!event.altKey || event.key.toLowerCase() !== 'n') {
@@ -809,7 +901,7 @@
   }
 
   function updateBodyModalState() {
-    var open = document.querySelector('.modal.is-open');
+    var open = document.querySelector('.modal.is-open, .modal.is-closing');
     if (open) {
       document.body.classList.add('is-modal-open');
     } else {
@@ -821,20 +913,43 @@
     if (!modal || !isModalOpen(modal)) {
       return;
     }
-    modal.classList.remove('is-open');
+    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var shouldAnimate = modal.classList.contains('fade') && !prefersReduced;
     modal.setAttribute('aria-hidden', 'true');
-    updateBodyModalState();
+    if (shouldAnimate) {
+      modal.classList.add('is-closing');
+      modal.classList.remove('is-open');
+      updateBodyModalState();
+    } else {
+      modal.classList.remove('is-open');
+      modal.classList.remove('is-closing');
+      updateBodyModalState();
+    }
 
     var options = opts || {};
-    if (options.restoreFocus !== false) {
-      var prev = modal.__kbReturnFocus;
-      if (prev && typeof prev.focus === 'function') {
-        try {
-          prev.focus();
-        } catch (e) {
-          // ignore focus errors
-        }
+    var prev = modal.__kbReturnFocus;
+    var finish = function () {
+      modal.classList.remove('is-closing');
+      updateBodyModalState();
+      if (options.restoreFocus === false) {
+        return;
       }
+      if (!prev || typeof prev.focus !== 'function') {
+        return;
+      }
+      try {
+        prev.focus();
+      } catch (e) {
+        // ignore focus errors
+      }
+    };
+    if (options.restoreFocus !== false) {
+      // handled by finish()
+    }
+    if (shouldAnimate) {
+      setTimeout(finish, 260);
+    } else {
+      finish();
     }
     modal.__kbReturnFocus = null;
   }
@@ -844,6 +959,7 @@
       return;
     }
     modal.__kbReturnFocus = document.activeElement;
+    modal.classList.remove('is-closing');
     modal.classList.add('is-open');
     modal.setAttribute('aria-hidden', 'false');
     updateBodyModalState();
@@ -1323,6 +1439,8 @@
         storage.setItem('kb:lastRoute', window.location.pathname);
       }
     }
+    applyThemeSetting();
+    bindThemeToggle();
     applyReveal();
     hydratePersistedForms();
     bindFilterState();

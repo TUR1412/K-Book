@@ -7,7 +7,7 @@
 </div>
 <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
 <button class="scroll-top" id="scroll-top" type="button" aria-label="回到顶部">↑</button>
-<div class="help-panel" id="shortcut-panel" aria-hidden="true" role="dialog" aria-labelledby="shortcut-title">
+<div class="help-panel" id="shortcut-panel" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="shortcut-title">
     <div class="help-card">
         <div>
             <h3 class="help-title" id="shortcut-title">快捷键指南</h3>
@@ -18,7 +18,7 @@
             <li><span>清空筛选</span><span><span class="kbd">Alt</span> + <span class="kbd">R</span></span></li>
             <li><span>高对比切换</span><span><span class="kbd">Alt</span> + <span class="kbd">C</span></span></li>
             <li><span>聚焦搜索</span><span><span class="kbd">/</span></span></li>
-            <li><span>聚焦搜索</span><span><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span> + <span class="kbd">K</span></span></li>
+            <li><span>快速搜索</span><span><span class="kbd">Ctrl</span>/<span class="kbd">⌘</span> + <span class="kbd">K</span></span></li>
             <li><span>打开帮助</span><span><span class="kbd">Shift</span> + <span class="kbd">/</span></span></li>
             <li><span>关闭弹层</span><span><span class="kbd">Esc</span></span></li>
         </ul>

@@ -181,12 +181,12 @@
 
 <jsp:include page="/admin/book_modal.jsp"></jsp:include>
 
-<div class="modal fade" id="addOrEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+<div class="modal fade" id="addOrEditModal" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="addOrEditModalLabel"
      aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="myModalLabel">图书信息</h3>
+                <h3 id="addOrEditModalLabel">图书信息</h3>
             </div>
             <div class="modal-body">
                 <form id="addOrEditBook" class="form-grid grid-2">
@@ -249,7 +249,7 @@
             <div class="modal-footer">
                 <button class="btn btn-primary" type="button" id="aoe" disabled data-kb-action="save-book">保存
                 </button>
-                <button class="btn btn-ghost" type="button" data-dismiss="modal" aria-hidden="true">关闭</button>
+                <button class="btn btn-ghost" type="button" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
