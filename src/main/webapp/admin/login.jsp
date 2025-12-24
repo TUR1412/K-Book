@@ -60,8 +60,8 @@
     window.__ctx = '${pageContext.request.contextPath}';
     window.__csrf = '${csrfToken}';
 </script>
-<script src="${pageContext.request.contextPath}/js/kb-api.js?v=${appVersion}"></script>
-<script src="${pageContext.request.contextPath}/js/app.js?v=${appVersion}"></script>
+<script src="${pageContext.request.contextPath}/js/kb-api.js?v=${appVersion}" defer></script>
+<script src="${pageContext.request.contextPath}/js/app.js?v=${appVersion}" defer></script>
 <script nonce="${cspNonce}" type="text/javascript">
     var _topWin = window;
     while (_topWin !== _topWin.parent.window) {
